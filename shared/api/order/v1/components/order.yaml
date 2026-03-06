@@ -1,0 +1,9 @@
+type: order
+properties:
+  order_uuid:
+    type: string
+    description: Unique ID
+  user_uuid:
+    type: string
+    description: User UUID
+  

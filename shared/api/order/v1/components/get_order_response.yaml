@@ -1,0 +1,35 @@
+type: object
+required:
+  - order_uuid
+  - user_uuid
+  - part_uuids
+  - total_price
+  - status
+properties:
+  order_uuid:
+    type: string
+    example: "550e8400-e29b-41d4-a716-446655440000"
+  user_uuid:
+    type: string
+    example: "a3bb189e-8bf9-3888-9912-ace4e6543002"
+  part_uuids:
+    type: array
+    items:
+      type: string
+    minItems: 1
+    example: ["d1e8a700-0000-0000-0000-000000000001"]
+  total_price:
+    type: number
+    format: double
+    example: 123.45
+  transaction_uuid:
+    type: string
+    nullable: true
+    description: UUID транзакции (заполняется после оплаты)
+    example: "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+  payment_method:
+    nullable: true
+    description: Способ оплаты (заполняется после оплаты)
+    $ref: './enums/payment_method.yaml'
+  status:
+    $ref: './enums/order_status.yaml'

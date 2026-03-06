@@ -1,0 +1,13 @@
+type: string
+description: |
+  Способ оплаты:
+  - CARD — банковская карта
+  - SBP — система быстрых платежей
+  - CREDIT_CARD — кредитная карта
+  - INVESTOR_MONEY — деньги инвестора
+enum:
+  - CARD
+  - SBP
+  - CREDIT_CARD
+  - INVESTOR_MONEY
+example: CARD

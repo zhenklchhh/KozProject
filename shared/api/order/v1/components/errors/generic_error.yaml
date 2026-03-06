@@ -1,0 +1,12 @@
+type: object
+required:
+  - message
+properties:
+  message:
+    type: string
+    description: Описание ошибки
+    example: "something went wrong"
+  code:
+    type: integer
+    description: Внутренний код ошибки
+    example: 10001

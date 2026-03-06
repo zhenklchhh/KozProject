@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+package inventory.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// InventoryService предоставляет API для работы с деталями
+service InventoryService {
+    // GetPart возвращает деталь по UUID
+    rpc GetPart(GetPartRequest) returns (GetPartResponse);
+    // ListParts возвращает список деталей с помощью фильтрации PartFilter
+    rpc ListParts(ListPartsRequest) returns (ListPartsResponse);
+}
+
+// Part описывает единицу детали на складе
+message Part {
+  string                    uuid           = 1;
+  string                    name           = 2;
+  string                    description    = 3;
+  double                    price          = 4;
+  int64                     stock_quantity = 5;
+  Category                  category       = 6;
+  Dimensions                dimensions     = 7;
+  Manufacturer              manufacturer   = 8;
+  repeated string           tags           = 9;
+  map<string, Value>        metadata       = 10;
+  google.protobuf.Timestamp created_at     = 11;
+  google.protobuf.Timestamp updated_at     = 12;
+}
+
+// Value представляет универсальное значение для метаданных
+message Value {
+  string string_value = 1;
+  int64  int64_value  = 2; 
+  double double_value = 3;
+  bool   bool_value   = 4;
+}
+
+// Dimensions описывает габариты и вес детали
+message Dimensions {
+  double length = 1;
+  double width  = 2;
+  double height = 3;
+  double weight = 4;
+}
+
+// Manufacturer описывает производителя детали
+message Manufacturer {
+  string name    = 1;
+  string country = 2;
+  string website = 3;
+}
+
+// Category определяет категорию детали
+enum Category {
+  CATEGORY_UNSPECIFIED = 0;
+  CATEGORY_ENGINE      = 1;
+  CATEGORY_FUEL        = 2;
+  CATEGORY_PORTHOLE    = 3;
+  CATEGORY_WING        = 4;
+}
+
+// PartFilter используется для фильтрации списка деталей
+message PartFilter {
+  repeated string   uuids                  = 1;
+  repeated string   names                  = 2;
+  repeated Category categories             = 3;
+  repeated string   manufacturer_countries = 4;
+  repeated string   tags                   = 5;
+}
+
+// GetPartRequest — запрос на получение детали
+message GetPartRequest {
+  string uuid = 1;
+}
+
+// GetPartResponse — ответ с данными детали
+message GetPartResponse {
+  Part part = 1;
+}
+
+// ListPartsRequest — запрос на список деталей
+message ListPartsRequest {
+  PartFilter filter = 1;
+}
+
+// ListPartsResponse — ответ со списком деталей
+message ListPartsResponse {
+  repeated Part parts = 1;
+}

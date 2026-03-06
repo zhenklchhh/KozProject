@@ -1,0 +1,20 @@
+version: v2
+clean: true
+
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: github.com/zhenklchhh/KozProject/pkg/proto
+
+plugins:
+  # Поднимаемся на два уровня вверх до корня, затем в папку bin
+  - local: ../../bin/protoc-gen-go.exe
+    out: ../../pkg/proto
+    opt:
+      - paths=source_relative
+  # Аналогично здесь
+  - local: ../../bin/protoc-gen-go-grpc.exe
+    out: ../../pkg/proto
+    opt:
+      - paths=source_relative

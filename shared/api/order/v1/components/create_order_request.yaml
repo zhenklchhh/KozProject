@@ -1,0 +1,16 @@
+type: object
+required:
+  - user_uuid
+  - part_uuids
+properties:
+  user_uuid:
+    type: string
+    description: UUID пользователя
+    example: "a3bb189e-8bf9-3888-9912-ace4e6543002"
+  part_uuids:
+    type: array
+    description: Список UUID деталей для заказа
+    minItems: 1
+    items:
+      type: string
+    example: ["d1e8a700-0000-0000-0000-000000000001", "f2c9b811-0000-0000-0000-000000000002"]

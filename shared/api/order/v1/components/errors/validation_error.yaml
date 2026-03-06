@@ -1,0 +1,26 @@
+type: object
+required:
+  - message
+  - fields
+properties:
+  message:
+    type: string
+    description: Общее описание ошибки валидации
+    example: "validation failed"
+  fields:
+    type: array
+    description: Список полей с ошибками
+    items:
+      type: object
+      required:
+        - field
+        - error
+      properties:
+        field:
+          type: string
+          description: Имя поля
+          example: "user_uuid"
+        error:
+          type: string
+          description: Описание ошибки поля
+          example: "must be a valid UUID"

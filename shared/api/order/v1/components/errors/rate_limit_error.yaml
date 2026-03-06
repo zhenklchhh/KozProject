@@ -1,0 +1,12 @@
+type: object
+required:
+  - message
+properties:
+  message:
+    type: string
+    description: Превышен лимит запросов
+    example: "rate limit exceeded: try again later"
+  retry_after_seconds:
+    type: integer
+    description: Через сколько секунд можно повторить запрос
+    example: 30

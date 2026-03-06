@@ -1,0 +1,8 @@
+type: object
+required:
+  - message
+properties:
+  message:
+    type: string
+    description: Доступ запрещён
+    example: "forbidden: you don't have permission to access this resource"

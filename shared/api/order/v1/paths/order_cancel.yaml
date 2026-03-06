@@ -1,0 +1,35 @@
+post:
+  operationId: cancelOrder
+  summary: Отменить заказ
+  description: |
+    Отменяет заказ если он в статусе PENDING_PAYMENT.
+    Если заказ уже PAID — возвращает 409 Conflict.
+  tags:
+    - orders
+  parameters:
+    - name: order_uuid
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '204':
+      description: Заказ успешно отменён
+    '404':
+      description: Заказ не найден
+      content:
+        application/json:
+          schema:
+            $ref: '../components/errors/not_found_error.yaml'
+    '409':
+      description: Заказ уже оплачен, отмена невозможна
+      content:
+        application/json:
+          schema:
+            $ref: '../components/errors/conflict_error.yaml'
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            $ref: '../components/errors/internal_server_error.yaml'

@@ -13,24 +13,24 @@ vars:
   YQ_VERSION: 'v4.45.2'
   GRPCURL_VERSION: 'v1.9.3'
 
-  BIN_DIR: '{{.ROOT_DIR}}\bin'
-  GOLANGCI_LINT: '{{.BIN_DIR}}\golangci-lint'
-  GCI: '{{.BIN_DIR}}\gci'
-  GOFUMPT: '{{.BIN_DIR}}\gofumpt'
-  BUF: '{{.BIN_DIR}}\buf'
-  OGEN: '{{.BIN_DIR}}\ogen'
-  YQ: '{{.BIN_DIR}}\yq'
-  PROTOC_GEN_GO: '{{.BIN_DIR}}\protoc-gen-go'
-  PROTOC_GEN_GO_GRPC: '{{.BIN_DIR}}\protoc-gen-go-grpc'
-  GRPCURL: '{{.BIN_DIR}}\grpcurl'
+  BIN_DIR: '{{.ROOT_DIR | toSlash}}/bin'
+  GOLANGCI_LINT: '{{.BIN_DIR}}/golangci-lint.exe'
+  GCI: '{{.BIN_DIR}}/gci.exe'
+  GOFUMPT: '{{.BIN_DIR}}/gofumpt.exe'
+  BUF: '{{.BIN_DIR}}/buf.exe'
+  OGEN: '{{.BIN_DIR}}/ogen.exe'
+  YQ: '{{.BIN_DIR}}/yq.exe'
+  PROTOC_GEN_GO: '{{.BIN_DIR}}/protoc-gen-go.exe'
+  PROTOC_GEN_GO_GRPC: '{{.BIN_DIR}}/protoc-gen-go-grpc.exe'
+  GRPCURL: '{{.BIN_DIR}}/grpcurl.exe'
 
-  NODE_MODULES_DIR: '{{.ROOT_DIR}}\node_modules\.bin'
-  REDOCLY: '{{.NODE_MODULES_DIR}}\redocly'
+  NODE_MODULES_DIR: '{{.ROOT_DIR | toSlash}}/node_modules/.bin'
+  REDOCLY: '{{.NODE_MODULES_DIR}}/redocly'
 
-  OPEN_API_ORDER_V1_BASE: '{{.ROOT_DIR}}\shared\api\order\v1\order.openapi.yaml'
-  OPEN_API_ORDER_V1_BUNDLE: '{{.ROOT_DIR}}\shared\api\bundles\order.openapi.v1.bundle.yaml'
+  OPEN_API_ORDER_V1_BASE: '{{.ROOT_DIR | toSlash}}/shared/api/order/v1/order.openapi.yaml'
+  OPEN_API_ORDER_V1_BUNDLE: '{{.ROOT_DIR | toSlash}}/shared/api/bundles/order.openapi.v1.bundle.yaml'
 
-  OPEN_API_FILES: '{{.ROOT_DIR}}\shared\api\bundles'
+  OPEN_API_FILES: '{{.ROOT_DIR | toSlash}}/shared/api/bundles'
 
   MODULES: assembly inventory order payment platform iam notification
 
@@ -134,17 +134,14 @@ tasks:
 
   install-buf:
     desc: "Устанавливает Buf в каталог bin"
+    # Используем статус, чтобы не переустанавливать, если файл уже есть
+    status:
+      - 'test -f "{{.BUF}}"'
     cmds:
-      - |
-        [ -f {{.BUF}} ] || {
-          mkdir -p {{.BIN_DIR}} tmp-buf
-          curl -sSL \
-            "https://github.com/bufbuild/buf/releases/download/v{{.BUF_VERSION}}/buf-$(uname -s)-$(uname -m).tar.gz" \
-            | tar -xz -C tmp-buf
-          mv tmp-buf/buf/bin/buf {{.BUF}}
-          rm -rf tmp-buf
-          chmod +x {{.BUF}}
-        }
+      - mkdir -p "{{.BIN_DIR}}"
+      - echo "📦 Устанавливаем buf v{{.BUF_VERSION}}..."
+      # go install работает везде одинаково и создаст buf.exe на Windows автоматически
+      - GOBIN="{{.BIN_DIR}}" go install github.com/bufbuild/buf/cmd/buf@v{{.BUF_VERSION}}
 
   proto:install-plugins:
     desc: "Устанавливает protoc плагины в каталог bin"
@@ -203,23 +200,35 @@ tasks:
         }
 
   ogen:gen:
-    desc: "Генерация Go-кода из всех OpenAPI-деклараций с x-ogen"
+    desc: "Генерация Go-кода"
     deps: [ ogen:install, yq:install ]
     cmds:
       - task: redocly-cli:bundle
       - |
-        find {{.OPEN_API_FILES}} -name '*.yaml' -o -name '*.yml' | while read -r file; do
-          if [ -f "$file" ] && grep -q 'x-ogen:' "$file"; then
-            echo "🚀 Generating from: $file"
-            target=$({{.YQ}} e '."x-ogen".target' "$file")
-            package=$({{.YQ}} e '."x-ogen".package' "$file")
-            echo "📁 Target: $target"
-            echo "📦 Package: $package"
-            {{.OGEN}} \
-              --target "$target" \
-              --package "$package" \
-              --clean \
-              "$file" || exit 1
+        # Перебираем все файлы .yaml и .yml в папке бандлов
+        for file in "{{.OPEN_API_FILES}}"/*.yaml "{{.OPEN_API_FILES}}"/*.yml; do
+          # Проверяем, что файл существует (чтобы не обрабатывать пустую маску)
+          if [ -f "$file" ]; then
+            # Проверяем наличие ключа x-ogen внутри файла
+            if grep -q "x-ogen" "$file"; then
+              echo "🚀 Generating from: $file"
+              
+              # Извлекаем параметры через yq. Кавычки вокруг бинарника обязательны!
+              TARGET=$("{{.YQ}}" e '."x-ogen".target' "$file")
+              PACKAGE=$("{{.YQ}}" e '."x-ogen".package' "$file")
+              
+              # Если yq вернул пустые значения, пропускаем
+              if [ -z "$TARGET" ] || [ "$TARGET" = "null" ]; then
+                echo "⚠️ Skip $file: 'x-ogen.target' not found"
+                continue
+              fi
+
+              echo "📁 Target: $TARGET"
+              echo "📦 Package: $PACKAGE"
+              
+              # Запуск ogen
+              "{{.OGEN}}" --target "$TARGET" --package "$PACKAGE" --clean "$file" || exit 1
+            fi
           fi
         done
 
