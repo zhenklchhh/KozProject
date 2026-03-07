@@ -15,7 +15,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: '../components/get_order_response.yaml'
+            $ref: '../components/order.yaml'
     '404':
       description: Заказ не найден
       content:

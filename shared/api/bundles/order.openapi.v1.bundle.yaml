@@ -3,6 +3,8 @@ info:
   title: OrderService API
   version: 1.0.0
   description: API для работы с заказами
+tags:
+  - name: Order
 paths:
   /api/v1/orders:
     post:
@@ -54,7 +56,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/get_order_response'
+                $ref: '#/components/schemas/order'
         '404':
           description: Заказ не найден
           content:
@@ -213,10 +215,10 @@ components:
         - CREDIT_CARD — кредитная карта
         - INVESTOR_MONEY — деньги инвестора
       enum:
-        - CARD
-        - SBP
-        - CREDIT_CARD
-        - INVESTOR_MONEY
+        - PAYMENT_METHOD_CARD
+        - PAYMENT_METHOD_SBP
+        - PAYMENT_METHOD_CREDIT_CARD
+        - PAYMENT_METHOD_INVESTOR_MONEY
       example: CARD
     order_status:
       type: string
@@ -230,8 +232,9 @@ components:
         - PAID
         - CANCELLED
       example: PENDING_PAYMENT
-    get_order_response:
+    order:
       type: object
+      description: Полная модель заказа
       required:
         - order_uuid
         - user_uuid
@@ -241,20 +244,24 @@ components:
       properties:
         order_uuid:
           type: string
+          description: Уникальный идентификатор заказа
           example: 550e8400-e29b-41d4-a716-446655440000
         user_uuid:
           type: string
+          description: UUID пользователя
           example: a3bb189e-8bf9-3888-9912-ace4e6543002
         part_uuids:
           type: array
+          description: Список UUID деталей в заказе
           items:
             type: string
-          minItems: 1
           example:
-            - d1e8a700-0000-0000-0000-000000000001
+            - d1e8a700-...
+            - f2c9b811-...
         total_price:
           type: number
           format: double
+          description: Итоговая стоимость заказа
           example: 123.45
         transaction_uuid:
           type: string
@@ -312,6 +319,6 @@ components:
           description: Описание ошибки
           example: 'Conflict: Order already paid and can''t be canceled'
 x-ogen:
-  target: ./pkg/api/order/v1
+  target: ./shared/pkg/api/order/v1
   package: order_v1
   clean: true

@@ -4,9 +4,12 @@ info:
   version: 1.0.0
   description: API для работы с заказами
 x-ogen:
-  target: ./pkg/api/order/v1
+  target: ./shared/pkg/api/order/v1
   package: order_v1
   clean: true
+
+tags:
+ - name: Order
 
 paths:
   /api/v1/orders:
