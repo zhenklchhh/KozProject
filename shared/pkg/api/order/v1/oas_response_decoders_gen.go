@@ -264,7 +264,7 @@ func decodeGetOrderResponse(resp *http.Response) (res GetOrderRes, _ error) {
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response GetOrderResponse
+			var response Order
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
