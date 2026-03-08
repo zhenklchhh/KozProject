@@ -28,6 +28,18 @@ post:
         application/json:
           schema:
             $ref: '../components/errors/not_found_error.yaml'
+    '409':
+      description: Заказ был оплачен/отменен
+      content:
+        application/json:
+          schema:
+            $ref: '../components/errors/conflict_error.yaml'
+    '400':
+      description: Неправильный запрос
+      content:
+        application/json:
+          schema:
+            $ref: '../components/errors/bad_request_error.yaml'
     '500':
       description: Внутренняя ошибка сервера
       content:

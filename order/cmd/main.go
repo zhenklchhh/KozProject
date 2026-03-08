@@ -19,7 +19,6 @@ import (
 	orderV1 "github.com/zhenklchhh/KozProject/shared/pkg/api/order/v1"
 	inventoryV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/inventory/v1"
 	paymentV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/payment/v1"
-	paymentv1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/payment/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -35,7 +34,7 @@ const (
 type OrderHandler struct {
 	inventoryClient inventoryV1.InventoryServiceClient
 	paymentClient   paymentV1.PaymentServiceClient
-	orderStorage *OrderStorage
+	orderStorage    *OrderStorage
 }
 
 type OrderStorage struct {
@@ -64,7 +63,7 @@ func NewOrderStorage() *OrderStorage {
 
 func NewOrderHandler() *OrderHandler {
 	return &OrderHandler{
-		orderStorage:         NewOrderStorage(),
+		orderStorage:    NewOrderStorage(),
 		inventoryClient: InitGrpcInventoryClient(),
 		paymentClient:   InitGrpcPaymentClient(),
 	}
@@ -76,12 +75,14 @@ func (h *OrderHandler) CreateOrder(ctx context.Context, req *orderV1.CreateOrder
 			Uuids: req.PartUuids,
 		},
 	})
-	if len(invResp.GetParts()) != len(req.PartUuids) {
-		return nil, fmt.Errorf("some parts don't exist in inventory service")
-	}
 	if err != nil {
-		log.Printf("failed to get list parts from inventory service: %v\n", err)
-		return nil, err
+		return nil, fmt.Errorf("failed to get list parts from inventory service: %v\n", err)
+	}
+	if len(invResp.GetParts()) != len(req.PartUuids) {
+		return &orderV1.BadRequestError{
+			Code:    400,
+			Message: "some parts don't exist in inventory service",
+		}, nil
 	}
 	totalPrice := 0.0
 	for _, part := range invResp.GetParts() {
@@ -107,11 +108,23 @@ func (h *OrderHandler) PayOrder(ctx context.Context,
 	req *orderV1.PayOrderRequest, params orderV1.PayOrderParams) (orderV1.PayOrderRes, error) {
 	order, ok := h.orderStorage.Get(params.OrderUUID)
 	if !ok {
-		return nil, fmt.Errorf("404: order %s not found", order.OrderUUID)
+		return &orderV1.NotFoundError{
+			Code:    404,
+			Message: fmt.Sprintf("order %s not found", params.OrderUUID),
+		}, nil
+	}
+	if order.GetStatus() != orderV1.OrderStatusPENDINGPAYMENT {
+		return &orderV1.ConflictError{
+			Code:    409,
+			Message: fmt.Sprintf("order %s has status '%s' and cannot be paid", params.OrderUUID, order.GetStatus()),
+		}, nil
 	}
 	paymentMethodNum, ok := paymentV1.PaymentMethod_value[string(req.PaymentMethod)]
 	if !ok {
-		return nil, fmt.Errorf("400: bad request: invalid payment method: %v\n", req.PaymentMethod)
+		return &orderV1.BadRequestError{
+			Code:    400,
+			Message: fmt.Sprintf("invalid payment method: %v\n", req.PaymentMethod),
+		}, nil
 	}
 	payResp, err := h.paymentClient.PayOrder(ctx, &paymentV1.PayOrderRequest{
 		OrderUuid:     order.OrderUUID,
@@ -119,13 +132,12 @@ func (h *OrderHandler) PayOrder(ctx context.Context,
 		PaymentMethod: paymentV1.PaymentMethod(paymentMethodNum),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("Payment Service: error paying order: %v\n", err)
+		return nil, fmt.Errorf("payment servic error: %v\n", err)
 	}
 	order.SetStatus(orderV1.OrderStatusPAID)
 	order.SetTransactionUUID(orderV1.NewOptNilString(payResp.GetTransactionUuid()))
 	order.SetPaymentMethod(orderV1.NewOptPaymentMethod(req.PaymentMethod))
 	h.orderStorage.Save(order)
-	log.Println(h.orderStorage.Get(params.OrderUUID))
 	return &orderV1.PayOrderResponse{
 		TransactionUUID: payResp.TransactionUuid,
 	}, nil
@@ -135,22 +147,29 @@ func (h *OrderHandler) CancelOrder(ctx context.Context,
 	params orderV1.CancelOrderParams) (orderV1.CancelOrderRes, error) {
 	order, ok := h.orderStorage.Get(params.OrderUUID)
 	if !ok {
-		log.Printf("404: order %s not found", params.OrderUUID)
-		return nil, nil
+		return &orderV1.NotFoundError{
+			Code:    404,
+			Message: fmt.Sprintf("order %s not found", params.OrderUUID),
+		}, nil
 	}
-	if order.GetStatus() == orderV1.OrderStatusPAID {
-		fmt.Printf("409: order %s already paid, can't be cancelled", params.OrderUUID)
-		return nil, nil
+	if order.GetStatus() != orderV1.OrderStatusPENDINGPAYMENT {
+		return &orderV1.ConflictError{
+			Code:    409,
+			Message: fmt.Sprintf("order %s can't be cancelled, order status = %s", params.OrderUUID, order.GetStatus()),
+		}, nil
 	}
 	order.SetStatus(orderV1.OrderStatusCANCELLED)
 	h.orderStorage.Save(order)
-	return nil, nil
+	return &orderV1.CancelOrderNoContent{}, nil
 }
 
 func (h *OrderHandler) GetOrder(ctx context.Context, params orderV1.GetOrderParams) (orderV1.GetOrderRes, error) {
 	order, ok := h.orderStorage.Get(params.OrderUUID)
 	if !ok {
-		return &orderV1.Order{}, fmt.Errorf("404: order %s not found", order.OrderUUID)
+		return &orderV1.NotFoundError{
+			Code:    404,
+			Message: fmt.Sprintf("order %s not found", params.OrderUUID),
+		}, nil
 	}
 	return order, nil
 }
@@ -168,7 +187,7 @@ func InitGrpcPaymentClient() paymentV1.PaymentServiceClient {
 	if err != nil {
 		log.Printf("failed to create client: %v\n", err)
 	}
-	return paymentv1.NewPaymentServiceClient(conn)
+	return paymentV1.NewPaymentServiceClient(conn)
 }
 
 func main() {
