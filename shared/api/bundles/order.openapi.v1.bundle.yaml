@@ -94,12 +94,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/pay_order_response'
+        '400':
+          description: Неправильный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/bad_request_error'
         '404':
           description: Заказ не найден
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/not_found_error'
+        '409':
+          description: Заказ был оплачен/отменен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/conflict_error'
         '500':
           description: Внутренняя ошибка сервера
           content:

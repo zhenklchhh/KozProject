@@ -35,6 +35,7 @@ func (s *BadRequestError) SetMessage(val string) {
 }
 
 func (*BadRequestError) createOrderRes() {}
+func (*BadRequestError) payOrderRes()    {}
 
 // CancelOrderNoContent is response for CancelOrder operation.
 type CancelOrderNoContent struct{}
@@ -70,6 +71,7 @@ func (s *ConflictError) SetMessage(val string) {
 }
 
 func (*ConflictError) cancelOrderRes() {}
+func (*ConflictError) payOrderRes()    {}
 
 // Ref: #/components/schemas/create_order_request
 type CreateOrderRequest struct {

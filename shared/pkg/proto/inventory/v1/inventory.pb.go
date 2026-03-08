@@ -213,11 +213,14 @@ func (x *Part) GetUpdatedAt() *timestamppb.Timestamp {
 
 // Value представляет универсальное значение для метаданных
 type Value struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	StringValue   string                 `protobuf:"bytes,1,opt,name=string_value,json=stringValue,proto3" json:"string_value,omitempty"`
-	Int64Value    int64                  `protobuf:"varint,2,opt,name=int64_value,json=int64Value,proto3" json:"int64_value,omitempty"`
-	DoubleValue   float64                `protobuf:"fixed64,3,opt,name=double_value,json=doubleValue,proto3" json:"double_value,omitempty"`
-	BoolValue     bool                   `protobuf:"varint,4,opt,name=bool_value,json=boolValue,proto3" json:"bool_value,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Value:
+	//
+	//	*Value_StringValue
+	//	*Value_Int64Value
+	//	*Value_DoubleValue
+	//	*Value_BoolValue
+	Value         isValue_Value `protobuf_oneof:"value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -252,33 +255,76 @@ func (*Value) Descriptor() ([]byte, []int) {
 	return file_inventory_v1_inventory_proto_rawDescGZIP(), []int{1}
 }
 
+func (x *Value) GetValue() isValue_Value {
+	if x != nil {
+		return x.Value
+	}
+	return nil
+}
+
 func (x *Value) GetStringValue() string {
 	if x != nil {
-		return x.StringValue
+		if x, ok := x.Value.(*Value_StringValue); ok {
+			return x.StringValue
+		}
 	}
 	return ""
 }
 
 func (x *Value) GetInt64Value() int64 {
 	if x != nil {
-		return x.Int64Value
+		if x, ok := x.Value.(*Value_Int64Value); ok {
+			return x.Int64Value
+		}
 	}
 	return 0
 }
 
 func (x *Value) GetDoubleValue() float64 {
 	if x != nil {
-		return x.DoubleValue
+		if x, ok := x.Value.(*Value_DoubleValue); ok {
+			return x.DoubleValue
+		}
 	}
 	return 0
 }
 
 func (x *Value) GetBoolValue() bool {
 	if x != nil {
-		return x.BoolValue
+		if x, ok := x.Value.(*Value_BoolValue); ok {
+			return x.BoolValue
+		}
 	}
 	return false
 }
+
+type isValue_Value interface {
+	isValue_Value()
+}
+
+type Value_StringValue struct {
+	StringValue string `protobuf:"bytes,1,opt,name=string_value,json=stringValue,proto3,oneof"`
+}
+
+type Value_Int64Value struct {
+	Int64Value int64 `protobuf:"varint,2,opt,name=int64_value,json=int64Value,proto3,oneof"`
+}
+
+type Value_DoubleValue struct {
+	DoubleValue float64 `protobuf:"fixed64,3,opt,name=double_value,json=doubleValue,proto3,oneof"`
+}
+
+type Value_BoolValue struct {
+	BoolValue bool `protobuf:"varint,4,opt,name=bool_value,json=boolValue,proto3,oneof"`
+}
+
+func (*Value_StringValue) isValue_Value() {}
+
+func (*Value_Int64Value) isValue_Value() {}
+
+func (*Value_DoubleValue) isValue_Value() {}
+
+func (*Value_BoolValue) isValue_Value() {}
 
 // Dimensions описывает габариты и вес детали
 type Dimensions struct {
@@ -692,14 +738,15 @@ const file_inventory_v1_inventory_proto_rawDesc = "" +
 	"updated_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x1aP\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12)\n" +
-	"\x05value\x18\x02 \x01(\v2\x13.inventory.v1.ValueR\x05value:\x028\x01\"\x8d\x01\n" +
-	"\x05Value\x12!\n" +
-	"\fstring_value\x18\x01 \x01(\tR\vstringValue\x12\x1f\n" +
-	"\vint64_value\x18\x02 \x01(\x03R\n" +
-	"int64Value\x12!\n" +
-	"\fdouble_value\x18\x03 \x01(\x01R\vdoubleValue\x12\x1d\n" +
+	"\x05value\x18\x02 \x01(\v2\x13.inventory.v1.ValueR\x05value:\x028\x01\"\x9e\x01\n" +
+	"\x05Value\x12#\n" +
+	"\fstring_value\x18\x01 \x01(\tH\x00R\vstringValue\x12!\n" +
+	"\vint64_value\x18\x02 \x01(\x03H\x00R\n" +
+	"int64Value\x12#\n" +
+	"\fdouble_value\x18\x03 \x01(\x01H\x00R\vdoubleValue\x12\x1f\n" +
 	"\n" +
-	"bool_value\x18\x04 \x01(\bR\tboolValue\"j\n" +
+	"bool_value\x18\x04 \x01(\bH\x00R\tboolValueB\a\n" +
+	"\x05value\"j\n" +
 	"\n" +
 	"Dimensions\x12\x16\n" +
 	"\x06length\x18\x01 \x01(\x01R\x06length\x12\x14\n" +
@@ -793,6 +840,12 @@ func init() { file_inventory_v1_inventory_proto_init() }
 func file_inventory_v1_inventory_proto_init() {
 	if File_inventory_v1_inventory_proto != nil {
 		return
+	}
+	file_inventory_v1_inventory_proto_msgTypes[1].OneofWrappers = []any{
+		(*Value_StringValue)(nil),
+		(*Value_Int64Value)(nil),
+		(*Value_DoubleValue)(nil),
+		(*Value_BoolValue)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
