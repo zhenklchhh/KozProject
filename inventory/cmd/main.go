@@ -12,7 +12,9 @@ import (
 
 	inventoryV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/inventory/v1"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 )
 
 const grpcPort = 50051
@@ -27,7 +29,17 @@ type InventoryStorage struct {
 	storage map[string]*inventoryV1.Part
 }
 
-func (s *InventoryStorage) Get(id string) (*inventoryV1.Part, bool) {
+func (s *InventoryStorage) GetAll() ([]*inventoryV1.Part) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	values := make([]*inventoryV1.Part, 0, len(s.storage))
+	for _, v := range s.storage {
+		values = append(values, v)
+	}
+	return values
+}
+
+func (s *InventoryStorage) Get(id string)(*inventoryV1.Part, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	part, ok := s.storage[id]
@@ -64,18 +76,16 @@ func (s *InventoryService) GetPart(ctx context.Context,
 	req *inventoryV1.GetPartRequest) (*inventoryV1.GetPartResponse, error) {
 	v, ok := s.InventoryStorage.Get(req.GetUuid())
 	if !ok {
-		return nil, fmt.Errorf("inventory service: part %s not found ", req.Uuid)
+		return nil, status.Errorf(codes.NotFound, "inventory service: part %s not found ", req.Uuid)
 	}
 	return &inventoryV1.GetPartResponse{Part: v}, nil
 }
 
 func (s *InventoryService) ListParts(ctx context.Context,
 	req *inventoryV1.ListPartsRequest) (*inventoryV1.ListPartsResponse, error) {
-	s.InventoryStorage.mu.RLock()
-	defer s.InventoryStorage.mu.RUnlock()
 	pf := req.GetFilter()
 	var result []*inventoryV1.Part
-	for _, part := range s.InventoryStorage.storage {
+	for _, part := range s.InventoryStorage.GetAll() {
 		if len(pf.GetUuids()) > 0 && !contains(pf.GetUuids(), part.GetUuid()) {
 			continue
 		}
@@ -85,7 +95,7 @@ func (s *InventoryService) ListParts(ctx context.Context,
 		if len(pf.GetCategories()) > 0 && !contains(pf.GetCategories(), part.GetCategory()) {
 			continue
 		}
-		if len(pf.GetManufacturerCountries()) > 0 && !contains(pf.GetManufacturerCountries(), part.GetManufacturer().String()) {
+		if len(pf.GetManufacturerCountries()) > 0 && !contains(pf.GetManufacturerCountries(), part.GetManufacturer().GetCountry()) {
 			continue
 		}
 		if len(pf.GetTags()) > 0 {
