@@ -9,10 +9,14 @@ import (
 	"os/signal"
 	"syscall"
 
+	"buf.build/go/protovalidate"
 	"github.com/google/uuid"
-	paymentV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/payment/v1"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
+
+	paymentV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/payment/v1"
 )
 
 const grpcPort = 50052
@@ -22,6 +26,9 @@ type PaymentService struct {
 }
 
 func (s *PaymentService) PayOrder(ctx context.Context, req *paymentV1.PayOrderRequest) (*paymentV1.PayOrderResponse, error) {
+	if err := protovalidate.Validate(req); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "payment service: validation error")
+	}
 	transactionUuid := uuid.New()
 	log.Printf("Оплата прошла успешно, transaction_uuid: %v\n", transactionUuid)
 	return &paymentV1.PayOrderResponse{TransactionUuid: transactionUuid.String()}, nil
