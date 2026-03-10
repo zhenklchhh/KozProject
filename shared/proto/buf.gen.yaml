@@ -6,6 +6,10 @@ managed:
   override:
     - file_option: go_package_prefix
       value: github.com/zhenklchhh/KozProject/pkg/proto
+    # Переопределяем импорт для buf/validate
+    - file_option: go_package
+      module: buf.build/bufbuild/protovalidate
+      value: buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate
 
 plugins:
   # Поднимаемся на два уровня вверх до корня, затем в папку bin
