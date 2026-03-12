@@ -12,16 +12,15 @@ import (
 	"syscall"
 	"time"
 
-	"buf.build/go/protovalidate"
-	"github.com/google/uuid"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
-	"google.golang.org/grpc/status"
 
+	paymentApi "github.com/zhenklchhh/KozProject/payment/internal/api/payment/v1"
+	paymentRepo "github.com/zhenklchhh/KozProject/payment/internal/repository/payment"
+	paymentService "github.com/zhenklchhh/KozProject/payment/internal/service/payment"
 	paymentV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/payment/v1"
 )
 
@@ -30,19 +29,6 @@ const (
 	httpPort          = 8081
 	readHeaderTimeout = 10 * time.Second
 )
-
-type PaymentService struct {
-	paymentV1.UnimplementedPaymentServiceServer
-}
-
-func (s *PaymentService) PayOrder(_ context.Context, req *paymentV1.PayOrderRequest) (*paymentV1.PayOrderResponse, error) {
-	if err := protovalidate.Validate(req); err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "payment service: validation error")
-	}
-	transactionUUID := uuid.New()
-	log.Printf("Оплата прошла успешно, transaction_uuid: %v\n", transactionUUID)
-	return &paymentV1.PayOrderResponse{TransactionUuid: transactionUUID.String()}, nil
-}
 
 func main() {
 	err := godotenv.Load(".env")
@@ -56,8 +42,10 @@ func main() {
 		return
 	}
 	s := grpc.NewServer()
-	service := &PaymentService{}
-	paymentV1.RegisterPaymentServiceServer(s, service)
+	repo := paymentRepo.NewRepository()
+	service := paymentService.NewService(repo)
+	api := paymentApi.NewApi(service)
+	paymentV1.RegisterPaymentServiceServer(s, api)
 	reflection.Register(s)
 	go func() {
 		log.Printf("🚀 gRPC server listening on :%d\n", grpcPort)

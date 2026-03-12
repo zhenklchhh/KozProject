@@ -3,7 +3,7 @@ package part
 import (
 	"context"
 
-	"github.com/zhenklchhh/KozProject/inventory/internal/converter"
+	"github.com/zhenklchhh/KozProject/inventory/internal/model"
 	"github.com/zhenklchhh/KozProject/inventory/internal/repository"
 	inventoryV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/inventory/v1"
 )
@@ -19,22 +19,18 @@ func NewService(repo repository.InventoryRepository) *service {
 	}
 }
 
-func (s *service) GetPart(ctx context.Context, req *inventoryV1.GetPartRequest) (*inventoryV1.GetPartResponse, error) {
-	part, err := s.repo.GetPart(ctx, req.Uuid)
+func (s *service) GetPart(ctx context.Context, uuid string) (*model.Part, error) {
+	part, err := s.repo.GetPart(ctx, uuid)
 	if err != nil {
 		return nil, err
 	}
-	return &inventoryV1.GetPartResponse{Part: converter.PartRepoToService(part)}, nil
+	return part, nil
 }
 
-func (s *service) ListParts(ctx context.Context, req *inventoryV1.ListPartsRequest) (*inventoryV1.ListPartsResponse, error) {
-	parts, err := s.repo.ListParts(ctx, converter.PartFilterServiceToRepo(req.Filter))
+func (s *service) ListParts(ctx context.Context, pf *model.PartFilter) ([]*model.Part, error) {
+	parts, err := s.repo.ListParts(ctx, pf)
 	if err != nil {
 		return nil, err
 	}
-	serviceParts := make([]*inventoryV1.Part, 0, len(parts))
-	for _, p := range parts {
-		serviceParts = append(serviceParts, converter.PartRepoToService(p))
-	}
-	return &inventoryV1.ListPartsResponse{Parts: serviceParts}, nil
+	return parts, nil
 }

@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 
-	paymentV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/payment/v1"
+	"github.com/zhenklchhh/KozProject/payment/internal/model"
 )
 
 type PaymentService interface {
-	PayOrder(ctx context.Context, req *paymentV1.PayOrderRequest) (*paymentV1.PayOrderResponse, error)
+	PayOrder(ctx context.Context, req *model.PayOrderRequest) (*model.PayOrderResponse, error)
 }

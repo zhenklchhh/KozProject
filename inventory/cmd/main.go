@@ -19,6 +19,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	invPartRepo "github.com/zhenklchhh/KozProject/inventory/internal/repository/part"
 	invPartService "github.com/zhenklchhh/KozProject/inventory/internal/service/part"
+	invPartApi "github.com/zhenklchhh/KozProject/inventory/internal/api/inventory/v1"
 	inventoryV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/inventory/v1"
 )
 
@@ -42,7 +43,8 @@ func main() {
 	s := grpc.NewServer()
 	repo := invPartRepo.NewRepository()
 	service := invPartService.NewService(repo)
-	inventoryV1.RegisterInventoryServiceServer(s, service)
+	apiHandler := invPartApi.NewApi(service)
+	inventoryV1.RegisterInventoryServiceServer(s, apiHandler)
 	reflection.Register(s)
 	go func() {
 		err := s.Serve(lis)
