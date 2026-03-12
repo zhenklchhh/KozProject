@@ -8,6 +8,8 @@ vars:
   BUF_VERSION: '1.53.0'
   PROTOC_GEN_GO_VERSION: 'v1.36.6'
   PROTOC_GEN_GO_GRPC_VERSION: 'v1.5.1'
+  PROTOC_GEN_GRPC_GATEWAY_VERSION: 'v2.28.0'
+  PROTOC_GEN_OPENAPIV2_VERSION: 'v2.28.0'
   OGEN_VERSION: 'v1.10.0'
   YQ_VERSION: 'v4.45.2'
   GRPCURL_VERSION: 'v1.9.3'
@@ -21,6 +23,8 @@ vars:
   YQ: '{{.BIN_DIR}}/yq.exe'
   PROTOC_GEN_GO: '{{.BIN_DIR}}/protoc-gen-go.exe'
   PROTOC_GEN_GO_GRPC: '{{.BIN_DIR}}/protoc-gen-go-grpc.exe'
+  PROTOC_GEN_GRPC_GATEWAY: '{{.BIN_DIR}}/protoc-gen-go-grpc-gateway.exe'
+  PROTOC_GEN_OPENAPIV2: '{{.BIN_DIR}}/protoc-gen-go-grpc-openapiv2.exe'
   GRPCURL: '{{.BIN_DIR}}/grpcurl.exe'
   JQ: '{{.BIN_DIR}}/gojq.exe'
   CURL: 'curl'
@@ -122,6 +126,14 @@ tasks:
           echo '📦 Installing protoc-gen-go-grpc...'
           GOBIN={{.BIN_DIR}} go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@{{.PROTOC_GEN_GO_GRPC_VERSION}}
         }
+        [ -f {{.PROTOC_GEN_GRPC_GATEWAY}} ] || {
+          echo '📦 Installing protoc-gen-go-grpc-gateway...'
+          GOBIN={{.BIN_DIR}} go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@{{.PROTOC_GEN_GRPC_GATEWAY_VERSION}}
+        }
+         [ -f {{.PROTOC_GEN_OPENAPIV2}} ] || {
+          echo '📦 Installing protoc-gen-openapiv2...'
+          GOBIN={{.BIN_DIR}} go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@{{.PROTOC_GEN_OPENAPIV2_VERSION}}
+        }
 
   proto:install-deps:
     desc: "Устанавливает зависимости для валидации protobuf"
@@ -141,6 +153,15 @@ tasks:
         echo '📦 Обновляем buf зависимости...'
         cd shared/proto && {{.BUF}} dep update
         echo '✅ Окружение для protobuf настроено!'
+  
+  proto:update-deps:
+    deps: [ install-buf ]
+    desc: Обновляет зависимости protobuf из удаленных репозиториев (googleapis и т.д.)
+    dir: proto
+    cmds:
+      - |
+        echo "🔄 Обновляем зависимости buf..."
+        {{.BUF}} dep update
 
   proto:gen:
     deps: [install-buf, proto:install-plugins, proto:lint]
@@ -150,7 +171,7 @@ tasks:
       - '{{.BUF}} generate'
 
   proto:lint:
-    deps: [install-buf, proto:install-plugins]
+    deps: [install-buf, proto:install-plugins, proto:update-deps]
     desc: Проверка .proto-файлов на соответствие стилю
     dir: shared/proto
     cmds:
