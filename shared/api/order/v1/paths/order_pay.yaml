@@ -29,7 +29,7 @@ post:
           schema:
             $ref: '../components/errors/not_found_error.yaml'
     '409':
-      description: Заказ был оплачен/отменен
+      description: Заказ был оплачен/отменены
       content:
         application/json:
           schema:

@@ -16,11 +16,12 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/google/uuid"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
 	orderV1 "github.com/zhenklchhh/KozProject/shared/pkg/api/order/v1"
 	inventoryV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/inventory/v1"
 	paymentV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/payment/v1"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
@@ -105,7 +106,8 @@ func (h *OrderHandler) CreateOrder(ctx context.Context, req *orderV1.CreateOrder
 }
 
 func (h *OrderHandler) PayOrder(ctx context.Context,
-	req *orderV1.PayOrderRequest, params orderV1.PayOrderParams) (orderV1.PayOrderRes, error) {
+	req *orderV1.PayOrderRequest, params orderV1.PayOrderParams,
+) (orderV1.PayOrderRes, error) {
 	order, ok := h.orderStorage.Get(params.OrderUUID)
 	if !ok {
 		return &orderV1.NotFoundError{
@@ -144,7 +146,8 @@ func (h *OrderHandler) PayOrder(ctx context.Context,
 }
 
 func (h *OrderHandler) CancelOrder(ctx context.Context,
-	params orderV1.CancelOrderParams) (orderV1.CancelOrderRes, error) {
+	params orderV1.CancelOrderParams,
+) (orderV1.CancelOrderRes, error) {
 	order, ok := h.orderStorage.Get(params.OrderUUID)
 	if !ok {
 		return &orderV1.NotFoundError{

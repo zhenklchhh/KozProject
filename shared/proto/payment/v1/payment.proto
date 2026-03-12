@@ -1,6 +1,9 @@
 syntax = "proto3";
 
 package payment.v1;
+
+import "buf/validate/validate.proto";
+
 // PaymentService предоставляет API для оплаты заказов
 service PaymentService {
     // PayOrder оплачиват заказ и возвращает UUID транзакции оплаты
@@ -9,8 +12,8 @@ service PaymentService {
 
 // PayOrderRequest предоставляет UUID заказа, пользователя и метод оплаты
 message PayOrderRequest {
-    string order_uuid = 1;
-    string user_uuid = 2;
+    string order_uuid = 1 [(buf.validate.field).string.uuid = true];
+    string user_uuid = 2 [(buf.validate.field).string.uuid = true];
     PaymentMethod payment_method = 3;
 }
 
@@ -25,5 +28,5 @@ enum PaymentMethod {
 
 // PayOrderResponse хранит оплаченной UUID транзакции
 message PayOrderResponse {
-    string transaction_uuid = 1;
+    string transaction_uuid = 1 [(buf.validate.field).string.uuid = true];
 }

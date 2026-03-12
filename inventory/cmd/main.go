@@ -10,11 +10,13 @@ import (
 	"sync"
 	"syscall"
 
-	inventoryV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/inventory/v1"
+	"buf.build/go/protovalidate"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
+
+	inventoryV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/inventory/v1"
 )
 
 const grpcPort = 50051
@@ -29,7 +31,7 @@ type InventoryStorage struct {
 	storage map[string]*inventoryV1.Part
 }
 
-func (s *InventoryStorage) GetAll() ([]*inventoryV1.Part) {
+func (s *InventoryStorage) GetAll() []*inventoryV1.Part {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	values := make([]*inventoryV1.Part, 0, len(s.storage))
@@ -39,7 +41,7 @@ func (s *InventoryStorage) GetAll() ([]*inventoryV1.Part) {
 	return values
 }
 
-func (s *InventoryStorage) Get(id string)(*inventoryV1.Part, bool) {
+func (s *InventoryStorage) Get(id string) (*inventoryV1.Part, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	part, ok := s.storage[id]
@@ -73,7 +75,11 @@ func NewStorage() *InventoryStorage {
 }
 
 func (s *InventoryService) GetPart(ctx context.Context,
-	req *inventoryV1.GetPartRequest) (*inventoryV1.GetPartResponse, error) {
+	req *inventoryV1.GetPartRequest,
+) (*inventoryV1.GetPartResponse, error) {
+	if err := protovalidate.Validate(req); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "inventory service: validation error")
+	}
 	v, ok := s.InventoryStorage.Get(req.GetUuid())
 	if !ok {
 		return nil, status.Errorf(codes.NotFound, "inventory service: part %s not found ", req.Uuid)
@@ -82,7 +88,11 @@ func (s *InventoryService) GetPart(ctx context.Context,
 }
 
 func (s *InventoryService) ListParts(ctx context.Context,
-	req *inventoryV1.ListPartsRequest) (*inventoryV1.ListPartsResponse, error) {
+	req *inventoryV1.ListPartsRequest,
+) (*inventoryV1.ListPartsResponse, error) {
+	if err := protovalidate.Validate(req); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "inventory service: validation error")
+	}
 	pf := req.GetFilter()
 	var result []*inventoryV1.Part
 	for _, part := range s.InventoryStorage.GetAll() {

@@ -3,6 +3,7 @@ syntax = "proto3";
 package inventory.v1;
 
 import "google/protobuf/timestamp.proto";
+import "buf/validate/validate.proto";
 
 // InventoryService предоставляет API для работы с деталями
 service InventoryService {
@@ -14,11 +15,14 @@ service InventoryService {
 
 // Part описывает единицу детали на складе
 message Part {
-  string                    uuid           = 1;
-  string                    name           = 2;
-  string                    description    = 3;
-  double                    price          = 4;
-  int64                     stock_quantity = 5;
+  string                    uuid           = 1 [(buf.validate.field).string.uuid = true];
+  string                    name           = 2 [
+  (buf.validate.field).string.min_len = 2,
+  (buf.validate.field).string.max_len = 55
+  ];
+  string                    description    = 3 [(buf.validate.field).string.max_len = 255];
+  double                    price          = 4 [(buf.validate.field).double.gt = 0.0];
+  int64                     stock_quantity = 5 [(buf.validate.field).int64.gt = 0];
   Category                  category       = 6;
   Dimensions                dimensions     = 7;
   Manufacturer              manufacturer   = 8;
@@ -40,17 +44,24 @@ message Value {
 
 // Dimensions описывает габариты и вес детали
 message Dimensions {
-  double length = 1;
-  double width  = 2;
-  double height = 3;
-  double weight = 4;
+  double length = 1 [(buf.validate.field).double.gt = 0.0];
+  double width  = 2 [(buf.validate.field).double.gt = 0.0];
+  double height = 3 [(buf.validate.field).double.gt = 0.0];
+  double weight = 4 [(buf.validate.field).double.gt = 0.0];
 }
 
 // Manufacturer описывает производителя детали
 message Manufacturer {
-  string name    = 1;
-  string country = 2;
-  string website = 3;
+  string name    = 1 [
+  (buf.validate.field).string.min_len = 2,
+  (buf.validate.field).string.max_len = 55
+  ];
+  string country = 2
+  [
+  (buf.validate.field).string.min_len = 2,
+  (buf.validate.field).string.max_len = 55
+  ];
+  string website = 3 [(buf.validate.field).string.uri_ref = true];
 }
 
 // Category определяет категорию детали
@@ -64,16 +75,27 @@ enum Category {
 
 // PartFilter используется для фильтрации списка деталей
 message PartFilter {
-  repeated string   uuids                  = 1;
-  repeated string   names                  = 2;
+  repeated string   uuids                  = 1 [
+    (buf.validate.field).repeated.items.string.uuid = true
+    ];
+  repeated string   names                  = 2 [
+  (buf.validate.field).repeated.items.string.min_len = 2,
+  (buf.validate.field).repeated.items.string.max_len = 55
+  ];
   repeated Category categories             = 3;
-  repeated string   manufacturer_countries = 4;
-  repeated string   tags                   = 5;
+  repeated string   manufacturer_countries = 4 [
+  (buf.validate.field).repeated.items.string.min_len = 2,
+  (buf.validate.field).repeated.items.string.max_len = 55
+  ];
+  repeated string   tags                   = 5 [
+  (buf.validate.field).repeated.items.string.min_len = 2,
+  (buf.validate.field).repeated.items.string.max_len = 55
+  ];
 }
 
 // GetPartRequest — запрос на получение детали
 message GetPartRequest {
-  string uuid = 1;
+  string uuid = 1 [(buf.validate.field).string.uuid = true];
 }
 
 // GetPartResponse — ответ с данными детали

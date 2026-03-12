@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  GO_VERSION: '1.24.4'
+  GO_VERSION: '1.26.1'
   GOLANGCI_LINT_VERSION: 'v2.1.5'
   GCI_VERSION: 'v0.13.6'
   GOFUMPT_VERSION: 'v0.8.0'
@@ -33,7 +33,7 @@ vars:
 
   OPEN_API_FILES: '{{.ROOT_DIR | toSlash}}/shared/api/bundles'
 
-  MODULES: assembly inventory order payment platform iam notification
+  MODULES: inventory order payment
 
 tasks:
   install-formatters:
@@ -61,7 +61,7 @@ tasks:
         for module in {{.MODULES}}; do
           if [ -d "$module" ]; then
             echo "🧼 Форматируем $module"
-            find $module -type f -name '*.go' ! -path '*/mocks/*' -exec {{.GOFUMPT}} -extra -w {} +
+            {{.GOFUMPT}} -extra -w $module
           fi
         done
       - |
@@ -69,7 +69,7 @@ tasks:
         for module in {{.MODULES}}; do
           if [ -d "$module" ]; then
             echo "🎯 Сортируем импорты в $module"
-            find $module -type f -name '*.go' ! -path '*/mocks/*' -exec {{.GCI}} write -s standard -s default -s "prefix(github.com/olezhek28/microservices-course-olezhek-solution)" {} +
+            {{.GCI}} write -s standard -s default -s "prefix(github.com/zhenklchhh/KozProject)" $module
           fi
         done
 
@@ -96,7 +96,7 @@ tasks:
         for mod in {{.MODULES}}; do
           if [ -d "$mod" ]; then
             echo "🔍 Линтим $mod module"
-            {{.GOLANGCI_LINT}} run $mod/... --config=.golangci.yml || ERR=1
+            {{.GOLANGCI_LINT}} run $mod/... --config=$mod/.golangci.yml || ERR=1
           fi
         done
         exit $ERR
@@ -122,6 +122,25 @@ tasks:
           echo '📦 Installing protoc-gen-go-grpc...'
           GOBIN={{.BIN_DIR}} go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@{{.PROTOC_GEN_GO_GRPC_VERSION}}
         }
+
+  proto:install-deps:
+    desc: "Устанавливает зависимости для валидации protobuf"
+    dir: shared
+    cmds:
+      - |
+        echo '📦 Устанавливаем зависимости для buf.validate...'
+        go get buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate
+        echo '✅ Зависимости для валидации установлены'
+
+  proto:setup:
+    desc: "Полная настройка окружения для работы с protobuf (для новых разработчиков)"
+    deps: [install-buf, proto:install-plugins]
+    cmds:
+      - task: proto:install-deps
+      - |
+        echo '📦 Обновляем buf зависимости...'
+        cd shared/proto && {{.BUF}} dep update
+        echo '✅ Окружение для protobuf настроено!'
 
   proto:gen:
     deps: [install-buf, proto:install-plugins, proto:lint]
