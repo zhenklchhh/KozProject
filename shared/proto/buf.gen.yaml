@@ -3,22 +3,29 @@ clean: true
 
 managed:
   enabled: true
+  disable:
+    - module: buf.build/googleapis/googleapis
   override:
     - file_option: go_package_prefix
-      value: github.com/zhenklchhh/KozProject/pkg/proto
+      value: github.com/zhenklchhh/KozProject/shared/pkg/proto
     # Переопределяем импорт для buf/validate
     - file_option: go_package
       module: buf.build/bufbuild/protovalidate
       value: buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate
 
 plugins:
-  # Поднимаемся на два уровня вверх до корня, затем в папку bin
   - local: ../../bin/protoc-gen-go.exe
     out: ../pkg/proto
     opt:
       - paths=source_relative
-  # Аналогично здесь
   - local: ../../bin/protoc-gen-go-grpc.exe
     out: ../pkg/proto
     opt:
       - paths=source_relative
+  - local: ../../bin/protoc-gen-grpc-gateway.exe
+    out: ../pkg/proto
+    opt:
+      - paths=source_relative
+      - generate_unbound_methods=true
+  - local: ../../bin/protoc-gen-openapiv2
+    out: ../../api

@@ -2,15 +2,25 @@ syntax = "proto3";
 
 package inventory.v1;
 
-import "google/protobuf/timestamp.proto";
 import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
 
 // InventoryService предоставляет API для работы с деталями
 service InventoryService {
     // GetPart возвращает деталь по UUID
-    rpc GetPart(GetPartRequest) returns (GetPartResponse);
+    rpc GetPart(GetPartRequest) returns (GetPartResponse) {
+      option (google.api.http) = {
+        get: "/api/v1/inventory/{uuid}"
+      };
+    };
     // ListParts возвращает список деталей с помощью фильтрации PartFilter
-    rpc ListParts(ListPartsRequest) returns (ListPartsResponse);
+    rpc ListParts(ListPartsRequest) returns (ListPartsResponse) {
+      option (google.api.http) = {
+        post: "/api/v1/inventory"
+        body: "*"
+      };
+    };
 }
 
 // Part описывает единицу детали на складе

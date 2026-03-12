@@ -1,0 +1,119 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "payment/v1/payment.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "PaymentService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/payment": {
+      "post": {
+        "summary": "PayOrder оплачиват заказ и возвращает UUID транзакции оплаты",
+        "operationId": "PaymentService_PayOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1PayOrderResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1PayOrderRequest"
+            }
+          }
+        ],
+        "tags": [
+          "PaymentService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1PayOrderRequest": {
+      "type": "object",
+      "properties": {
+        "orderUuid": {
+          "type": "string"
+        },
+        "userUuid": {
+          "type": "string"
+        },
+        "paymentMethod": {
+          "$ref": "#/definitions/v1PaymentMethod"
+        }
+      },
+      "title": "PayOrderRequest предоставляет UUID заказа, пользователя и метод оплаты"
+    },
+    "v1PayOrderResponse": {
+      "type": "object",
+      "properties": {
+        "transactionUuid": {
+          "type": "string"
+        }
+      },
+      "title": "PayOrderResponse хранит оплаченной UUID транзакции"
+    },
+    "v1PaymentMethod": {
+      "type": "string",
+      "enum": [
+        "PAYMENT_METHOD_UNSPECIFIED",
+        "PAYMENT_METHOD_CARD",
+        "PAYMENT_METHOD_SBP",
+        "PAYMENT_METHOD_CREDIT_CARD",
+        "PAYMENT_METHOD_INVESTOR_MONEY"
+      ],
+      "default": "PAYMENT_METHOD_UNSPECIFIED",
+      "title": "Перечисление методов оплаты"
+    }
+  }
+}

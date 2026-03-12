@@ -8,6 +8,7 @@ package paymentv1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -189,7 +190,7 @@ var File_payment_v1_payment_proto protoreflect.FileDescriptor
 const file_payment_v1_payment_proto_rawDesc = "" +
 	"\n" +
 	"\x18payment/v1/payment.proto\x12\n" +
-	"payment.v1\x1a\x1bbuf/validate/validate.proto\"\xa3\x01\n" +
+	"payment.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1cgoogle/api/annotations.proto\"\xa3\x01\n" +
 	"\x0fPayOrderRequest\x12'\n" +
 	"\n" +
 	"order_uuid\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\torderUuid\x12%\n" +
@@ -202,10 +203,10 @@ const file_payment_v1_payment_proto_rawDesc = "" +
 	"\x13PAYMENT_METHOD_CARD\x10\x01\x12\x16\n" +
 	"\x12PAYMENT_METHOD_SBP\x10\x02\x12\x1e\n" +
 	"\x1aPAYMENT_METHOD_CREDIT_CARD\x10\x03\x12!\n" +
-	"\x1dPAYMENT_METHOD_INVESTOR_MONEY\x10\x042W\n" +
-	"\x0ePaymentService\x12E\n" +
-	"\bPayOrder\x12\x1b.payment.v1.PayOrderRequest\x1a\x1c.payment.v1.PayOrderResponseB\xa8\x01\n" +
-	"\x0ecom.payment.v1B\fPaymentProtoP\x01Z?github.com/zhenklchhh/KozProject/pkg/proto/payment/v1;paymentv1\xa2\x02\x03PXX\xaa\x02\n" +
+	"\x1dPAYMENT_METHOD_INVESTOR_MONEY\x10\x042s\n" +
+	"\x0ePaymentService\x12a\n" +
+	"\bPayOrder\x12\x1b.payment.v1.PayOrderRequest\x1a\x1c.payment.v1.PayOrderResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/api/v1/paymentB\xaf\x01\n" +
+	"\x0ecom.payment.v1B\fPaymentProtoP\x01ZFgithub.com/zhenklchhh/KozProject/shared/pkg/proto/payment/v1;paymentv1\xa2\x02\x03PXX\xaa\x02\n" +
 	"Payment.V1\xca\x02\n" +
 	"Payment\\V1\xe2\x02\x16Payment\\V1\\GPBMetadata\xea\x02\vPayment::V1b\x06proto3"
 
