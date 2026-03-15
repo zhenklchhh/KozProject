@@ -1,8 +1,6 @@
 package payment
 
 import (
-	"testing"
-
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/zhenklchhh/KozProject/payment/internal/model"
 )
@@ -15,7 +13,7 @@ type testCase struct {
 	repoError    error
 }
 
-func (s *ServiceSuit) TestPayOrderValidRequest(t *testing.T) {
+func (s *ServiceSuit) TestPayOrderValidRequest() {
 	tc := &testCase{
 		req: &model.PayOrderRequest{
 			OrderUuid:     gofakeit.UUID(),
@@ -25,12 +23,12 @@ func (s *ServiceSuit) TestPayOrderValidRequest(t *testing.T) {
 		expectedUUID: gofakeit.UUID(),
 	}
 	s.paymentRepo.On("PayOrder", s.ctx, tc.req).Return(tc.expectedUUID, nil)
-	id, err := s.service.PayOrder(s.ctx, tc.req)
-	s.Require().Equal(tc.expectedUUID, id)
+	response, err := s.service.PayOrder(s.ctx, tc.req)
+	s.Require().Equal(tc.expectedUUID, response.TransactionUuid)
 	s.Require().NoError(err)
 }
 
-func (s *ServiceSuit) TestPayOrderInvalidRequest(t *testing.T) {
+func (s *ServiceSuit) TestPayOrderInvalidRequest() {
 	tc := &testCase{
 		req: &model.PayOrderRequest{
 			OrderUuid:     "",
@@ -39,7 +37,7 @@ func (s *ServiceSuit) TestPayOrderInvalidRequest(t *testing.T) {
 		},
 	}
 	s.paymentRepo.On("PayOrder", s.ctx, tc.req).Return("", model.ErrValidation)
-	uuid, err := s.service.PayOrder(s.ctx, tc.req)
+	response, err := s.service.PayOrder(s.ctx, tc.req)
 	s.Require().Error(err)
-	s.Require().Empty(uuid)
+	s.Require().Nil(response)
 }
