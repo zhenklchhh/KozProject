@@ -1,0 +1,45 @@
+package payment
+
+import (
+	"testing"
+
+	"github.com/brianvoe/gofakeit/v7"
+	"github.com/zhenklchhh/KozProject/payment/internal/model"
+)
+
+type testCase struct {
+	name         string
+	req          *model.PayOrderRequest
+	isValidReq   bool
+	expectedUUID string
+	repoError    error
+}
+
+func (s *ServiceSuit) TestPayOrderValidRequest(t *testing.T) {
+	tc := &testCase{
+		req: &model.PayOrderRequest{
+			OrderUuid:     gofakeit.UUID(),
+			UserUuid:      gofakeit.UUID(),
+			PaymentMethod: model.PaymentMethodCard,
+		},
+		expectedUUID: gofakeit.UUID(),
+	}
+	s.paymentRepo.On("PayOrder", s.ctx, tc.req).Return(tc.expectedUUID, nil)
+	id, err := s.service.PayOrder(s.ctx, tc.req)
+	s.Require().Equal(tc.expectedUUID, id)
+	s.Require().NoError(err)
+}
+
+func (s *ServiceSuit) TestPayOrderInvalidRequest(t *testing.T) {
+	tc := &testCase{
+		req: &model.PayOrderRequest{
+			OrderUuid:     "",
+			UserUuid:      "",
+			PaymentMethod: 404,
+		},
+	}
+	s.paymentRepo.On("PayOrder", s.ctx, tc.req).Return("", model.ErrValidation)
+	uuid, err := s.service.PayOrder(s.ctx, tc.req)
+	s.Require().Error(err)
+	s.Require().Empty(uuid)
+}
