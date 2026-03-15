@@ -13,6 +13,7 @@ vars:
   OGEN_VERSION: 'v1.10.0'
   YQ_VERSION: 'v4.45.2'
   GRPCURL_VERSION: 'v1.9.3'
+  MOCKERY_VERSION: 'v2.53.3'
 
   BIN_DIR: '{{.ROOT_DIR | toSlash}}/bin'
   GOLANGCI_LINT: '{{.BIN_DIR}}/golangci-lint.exe'
@@ -28,6 +29,7 @@ vars:
   GRPCURL: '{{.BIN_DIR}}/grpcurl.exe'
   JQ: '{{.BIN_DIR}}/gojq.exe'
   CURL: 'curl'
+  MOCKERY: '{{.BIN_DIR}}/mockery'
 
   NODE_MODULES_DIR: '{{.ROOT_DIR | toSlash}}/node_modules/.bin'
   REDOCLY: '{{.NODE_MODULES_DIR}}/redocly'
@@ -176,6 +178,47 @@ tasks:
     dir: shared/proto
     cmds:
       - '{{.BUF}} lint'
+
+  mockery:gen:
+    desc: "Генерирует моки интерфейсов с помощью mockery"
+    deps: [ mockery:install ]
+    cmds:
+      - |
+        echo '🧪 Генерация моков...'
+        {{.MOCKERY}}
+
+  test-coverage:
+    desc: "Тесты с покрытием бизнес-логики, автоматический поиск и анализ всех модулей"
+    cmds:
+      - |
+        echo "🧪 Запускаем расчёт покрытия..."
+        rm -rf {{.COVERAGE_DIR}}
+        mkdir -p {{.COVERAGE_DIR}}
+        
+        # Находим все пакеты, для которых нужно измерить покрытие (исключаем mocks)
+        TARGET_PACKAGES=$(go list ./internal/... | grep -v "/mocks" | grep -E '/(api|service)/' | tr '\n' ',')
+        
+        if [ -z "$TARGET_PACKAGES" ]; then
+          echo "⚠️ Не найдено пакетов для тестирования"
+          exit 1
+        fi
+        
+        echo "🧪 Запуск тестов со сбором покрытия для всех модулей..."
+        go test -v -coverprofile={{.COVERAGE_DIR}}/coverage.out -coverpkg=$TARGET_PACKAGES ./...
+        
+        echo "🧾 Общее покрытие:"
+        go tool cover -func={{.COVERAGE_DIR}}/coverage.out | tail -n1
+
+  mockery:install:
+    desc: "Устанавливает mockery в ./bin"
+    cmds:
+      - |
+        [ -f {{.MOCKERY}} ] || {
+          echo '📦 Installing mockery...'
+          GOBIN={{.BIN_DIR}} go install github.com/vektra/mockery/v2@{{.MOCKERY_VERSION}}
+        }
+    status:
+      - test -x {{.MOCKERY}}
 
   redocly-cli:install:
     desc: Установить локально Redocly CLI
