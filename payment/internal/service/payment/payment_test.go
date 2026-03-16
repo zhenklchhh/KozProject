@@ -6,11 +6,8 @@ import (
 )
 
 type testCase struct {
-	name         string
 	req          *model.PayOrderRequest
-	isValidReq   bool
 	expectedUUID string
-	repoError    error
 }
 
 func (s *ServiceSuit) TestPayOrderValidRequest() {
