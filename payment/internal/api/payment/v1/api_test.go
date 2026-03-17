@@ -43,7 +43,6 @@ func (s *ApiSuit) TestPayOrderInvalidRequest() {
 		},
 		expectedErr: status.Errorf(codes.InvalidArgument, "payment service: validation error"),
 	}
-	// The validation happens before service call, so no service call should be made
 	response, err := s.handler.PayOrder(s.ctx, tc.req)
 	s.Require().Error(err)
 	s.Require().Equal(tc.expectedErr, err)

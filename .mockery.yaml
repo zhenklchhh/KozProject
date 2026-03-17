@@ -7,7 +7,7 @@ resolve-type-alias: False
 issue-845-fix: True
 
 packages:
-  github.com/zhenklchhh/KozProject/payment/internal/service:
+  github.com/zhenklchhh/KozProject/o/internal/service:
     config:
       include-regex: ".*Service"
 
@@ -30,3 +30,9 @@ packages:
   github.com/zhenklchhh/KozProject/inventory/internal/repository:
     config:
       include-regex: ".*Repository"
+  github.com/zhenklchhh/KozProject/shared/pkg/proto/inventory/v1:
+    config:
+      include-regex: ".*ServiceClient"
+  github.com/zhenklchhh/KozProject/shared/pkg/proto/payment/v1:
+    config:
+      include-regex: ".*ServiceClient"

@@ -14,7 +14,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	api "github.com/zhenklchhh/KozProject/order/internal/api/order/v1"
+	orderApi "github.com/zhenklchhh/KozProject/order/internal/api/order/v1"
 	"github.com/zhenklchhh/KozProject/order/internal/repository/order"
 	service "github.com/zhenklchhh/KozProject/order/internal/service/order"
 	orderV1 "github.com/zhenklchhh/KozProject/shared/pkg/api/order/v1"
@@ -29,7 +29,7 @@ const (
 func main() {
 	repo := order.NewRepository()
 	svc := service.NewService(repo)
-	apiHandler := api.NewApi(svc)
+	apiHandler := orderApi.NewApi(svc,nil,nil)
 	apiServer, err := orderV1.NewServer(apiHandler)
 	if err != nil {
 		log.Fatalf("ошибка создания сервера OpenAPI: %v", err)
