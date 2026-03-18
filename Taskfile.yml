@@ -15,8 +15,9 @@ vars:
   GRPCURL_VERSION: 'v1.9.3'
   MOCKERY_VERSION: 'v2.53.3'
 
-  BIN_DIR: '{{.ROOT_DIR | toSlash}}/bin'
-  GOLANGCI_LINT: '{{.BIN_DIR}}/golangci-lint.exe'
+  BIN_DIR: "{{.ROOT_DIR}}/bin"
+  EXT: '{{if eq OS "windows"}}.exe{{end}}'
+  GOLANGCI_LINT: "{{.BIN_DIR}}/golangci-lint{{.EXT}}"
   GCI: '{{.BIN_DIR}}/gci.exe'
   GOFUMPT: '{{.BIN_DIR}}/gofumpt.exe'
   BUF: '{{.BIN_DIR}}/buf.exe'
