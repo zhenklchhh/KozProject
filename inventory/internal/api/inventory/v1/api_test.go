@@ -61,7 +61,7 @@ func (s *ApiSuite) TestGetPartServiceError() {
 	s.Require().Error(err)
 	s.Require().Equal(expectedErr, err)
 	s.Require().Empty(resp)
-	s.service.AssertNotCalled(s.T(), "GetPart", s.ctx, req.Uuid)
+	s.service.AssertCalled(s.T(), "GetPart", s.ctx, req.Uuid)
 }
 
 func (s *ApiSuite) TestListPartsSuccess() {

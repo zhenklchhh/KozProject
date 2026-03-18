@@ -18,6 +18,10 @@ func NewRepository() *repository {
 	}
 }
 
+func (r *repository) GetStorage() *InventoryStorage{
+	return r.invStorage
+}
+
 type InventoryStorage struct {
 	mu      sync.RWMutex
 	storage map[string]*invModel.Part

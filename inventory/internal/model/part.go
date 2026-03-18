@@ -43,7 +43,7 @@ type Manufacturer struct {
 }
 
 func (m *Manufacturer) GetCountry() string {
-	return m.Name
+	return m.Country
 }
 
 type Value struct {
