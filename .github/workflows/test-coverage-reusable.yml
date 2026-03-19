@@ -32,9 +32,17 @@ jobs:
       - name: 🧰 Set up Go
         uses: actions/setup-go@v5.4.0
         with:
-          go-version: ${{ inputs.go-version }}
+          go-version-file: '.go-version'
+          cache: false
 
-      - name: 📌 Install Task
+      - name: � Verify Go version
+        run: |
+          echo "Go version:"
+          go version
+          echo "Checking for covdata tool:"
+          go tool covdata || echo "⚠️ covdata not available"
+
+      - name: �📌 Install Task
         uses: arduino/setup-task@v2.0.0
 
       - name: 🧪 Run tests with coverage

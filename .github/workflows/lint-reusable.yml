@@ -25,7 +25,8 @@ jobs:
       - name: 🛠 Set up Go
         uses: actions/setup-go@v5.4.0
         with:
-          go-version: ${{ inputs.go-version }}
+          go-version-file: '.go-version'
+          cache: false
 
       - name: 🐾 Show go.work (debug)
         run: cat go.work || echo "❗ go.work not found"

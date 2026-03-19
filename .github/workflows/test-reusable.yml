@@ -22,8 +22,8 @@ jobs:
       - name: 🛠 Set up Go
         uses: actions/setup-go@v5.4.0
         with:
-          go-version: ${{ inputs.go-version }}
-          cache: false # отключаем кэш go.sum в корне
+          go-version-file: '.go-version'
+          cache: false
 
       - name: 📌 Install Task
         uses: arduino/setup-task@v2.0.0
