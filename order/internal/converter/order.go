@@ -3,6 +3,7 @@ package converter
 import (
 	"github.com/zhenklchhh/KozProject/order/internal/model"
 	orderV1 "github.com/zhenklchhh/KozProject/shared/pkg/api/order/v1"
+	paymentV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/payment/v1"
 )
 
 func OrderServiceToRepo(order *orderV1.Order) *model.Order {
@@ -203,5 +204,21 @@ func PaymentMethodRepoToService(method model.PaymentMethod) orderV1.PaymentMetho
 		return orderV1.PaymentMethodPAYMENTMETHODINVESTORMONEY
 	default:
 		return orderV1.PaymentMethodPAYMENTMETHODCARD
+	}
+}
+
+func ConvertPayOrderRequestApiToService(req *paymentV1.PayOrderRequest) *model.PayOrderServiceRequest {
+	return &model.PayOrderServiceRequest{
+		OrderUuid:     req.OrderUuid,
+		UserUuid:      req.UserUuid,
+		PaymentMethod: model.PaymentMethod(req.PaymentMethod.String()),
+	}
+}
+
+func ConvertPayOrderRequestServiceToApi(req *model.PayOrderServiceRequest) *paymentV1.PayOrderRequest {
+	return &paymentV1.PayOrderRequest{
+		OrderUuid:     req.OrderUuid,
+		UserUuid:      req.UserUuid,
+		PaymentMethod: paymentV1.PaymentMethod(paymentV1.PaymentMethod_value[string(req.PaymentMethod)]),
 	}
 }

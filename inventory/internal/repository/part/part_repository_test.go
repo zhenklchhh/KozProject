@@ -10,7 +10,7 @@ import (
 func setupStorage(storage *InventoryStorage) {
 	parts := []*model.Part{
 		{
-			Uuid:          "engine-001",
+			UUID:          "engine-001",
 			Name:          "V8 Engine",
 			Description:   "High performance V8 engine",
 			Price:         15000.0,
@@ -24,7 +24,7 @@ func setupStorage(storage *InventoryStorage) {
 			UpdatedAt:     &time.Time{},
 		},
 		{
-			Uuid:          "fuel-001",
+			UUID:          "fuel-001",
 			Name:          "Fuel Pump",
 			Description:   "Electric fuel pump",
 			Price:         250.0,
@@ -38,7 +38,7 @@ func setupStorage(storage *InventoryStorage) {
 			UpdatedAt:     &time.Time{},
 		},
 		{
-			Uuid:          "wing-001",
+			UUID:          "wing-001",
 			Name:          "Aircraft Wing",
 			Description:   "Commercial aircraft wing",
 			Price:         50000.0,
@@ -52,7 +52,7 @@ func setupStorage(storage *InventoryStorage) {
 			UpdatedAt:     &time.Time{},
 		},
 		{
-			Uuid:          "porthole-001",
+			UUID:          "porthole-001",
 			Name:          "Round Porthole",
 			Description:   "Standard round porthole",
 			Price:         800.0,
@@ -66,7 +66,7 @@ func setupStorage(storage *InventoryStorage) {
 			UpdatedAt:     &time.Time{},
 		},
 		{
-			Uuid:          "engine-002",
+			UUID:          "engine-002",
 			Name:          "Turbo Engine",
 			Description:   "Turbocharged 4-cylinder engine",
 			Price:         8000.0,
@@ -89,173 +89,173 @@ func TestListParts(t *testing.T) {
 	repo := NewRepository()
 	setupStorage(repo.GetStorage())
 
-	testCases := []struct{
-		name string
-		pf *model.PartFilter
+	testCases := []struct {
+		name          string
+		pf            *model.PartFilter
 		expectedCount int
 		expectedUuids []string
-		expectError bool
-		err error
+		expectError   bool
+		err           error
 	}{
 		{
-			name: "no filter - return all parts",
-			pf: &model.PartFilter{},
+			name:          "no filter - return all parts",
+			pf:            &model.PartFilter{},
 			expectedCount: 5,
 			expectedUuids: []string{"engine-001", "fuel-001", "wing-001", "porthole-001", "engine-002"},
-			expectError: false,
+			expectError:   false,
 		},
 		{
-			name: "nil filter - return all parts",
-			pf: nil,
+			name:          "nil filter - return all parts",
+			pf:            nil,
 			expectedCount: 5,
 			expectedUuids: []string{"engine-001", "fuel-001", "wing-001", "porthole-001", "engine-002"},
-			expectError: false,
+			expectError:   false,
 		},
 		{
-			name: "filter by single UUID",
-			pf: &model.PartFilter{Uuids: []string{"engine-001"}},
+			name:          "filter by single UUID",
+			pf:            &model.PartFilter{Uuids: []string{"engine-001"}},
 			expectedCount: 1,
 			expectedUuids: []string{"engine-001"},
-			expectError: false,
+			expectError:   false,
 		},
 		{
-			name: "filter by multiple UUIDs",
-			pf: &model.PartFilter{Uuids: []string{"engine-001", "fuel-001"}},
+			name:          "filter by multiple UUIDs",
+			pf:            &model.PartFilter{Uuids: []string{"engine-001", "fuel-001"}},
 			expectedCount: 2,
 			expectedUuids: []string{"engine-001", "fuel-001"},
-			expectError: false,
+			expectError:   false,
 		},
 		{
-			name: "filter by non-existent UUID",
-			pf: &model.PartFilter{Uuids: []string{"non-existent"}},
+			name:          "filter by non-existent UUID",
+			pf:            &model.PartFilter{Uuids: []string{"non-existent"}},
 			expectedCount: 0,
 			expectedUuids: []string{},
-			expectError: false,
+			expectError:   false,
 		},
 		{
-			name: "filter by single name",
-			pf: &model.PartFilter{Names: []string{"V8 Engine"}},
+			name:          "filter by single name",
+			pf:            &model.PartFilter{Names: []string{"V8 Engine"}},
 			expectedCount: 1,
 			expectedUuids: []string{"engine-001"},
-			expectError: false,
+			expectError:   false,
 		},
 		{
-			name: "filter by multiple names",
-			pf: &model.PartFilter{Names: []string{"V8 Engine", "Fuel Pump"}},
+			name:          "filter by multiple names",
+			pf:            &model.PartFilter{Names: []string{"V8 Engine", "Fuel Pump"}},
 			expectedCount: 2,
 			expectedUuids: []string{"engine-001", "fuel-001"},
-			expectError: false,
+			expectError:   false,
 		},
 		{
-			name: "filter by non-existent name",
-			pf: &model.PartFilter{Names: []string{"Non-existent Part"}},
+			name:          "filter by non-existent name",
+			pf:            &model.PartFilter{Names: []string{"Non-existent Part"}},
 			expectedCount: 0,
 			expectedUuids: []string{},
-			expectError: false,
+			expectError:   false,
 		},
 		{
-			name: "filter by single category",
-			pf: &model.PartFilter{Categories: []model.Category{model.CategoryEngine}},
+			name:          "filter by single category",
+			pf:            &model.PartFilter{Categories: []model.Category{model.CategoryEngine}},
 			expectedCount: 2,
 			expectedUuids: []string{"engine-001", "engine-002"},
-			expectError: false,
+			expectError:   false,
 		},
 		{
-			name: "filter by multiple categories",
-			pf: &model.PartFilter{Categories: []model.Category{model.CategoryEngine, model.CategoryFuel}},
+			name:          "filter by multiple categories",
+			pf:            &model.PartFilter{Categories: []model.Category{model.CategoryEngine, model.CategoryFuel}},
 			expectedCount: 3,
 			expectedUuids: []string{"engine-001", "fuel-001", "engine-002"},
-			expectError: false,
+			expectError:   false,
 		},
 		{
-			name: "filter by single manufacturer country",
-			pf: &model.PartFilter{ManufacturerCountries: []string{"USA"}},
+			name:          "filter by single manufacturer country",
+			pf:            &model.PartFilter{ManufacturerCountries: []string{"USA"}},
 			expectedCount: 2,
 			expectedUuids: []string{"engine-001", "wing-001"},
-			expectError: false,
+			expectError:   false,
 		},
 		{
-			name: "filter by multiple manufacturer countries",
-			pf: &model.PartFilter{ManufacturerCountries: []string{"USA", "Germany"}},
+			name:          "filter by multiple manufacturer countries",
+			pf:            &model.PartFilter{ManufacturerCountries: []string{"USA", "Germany"}},
 			expectedCount: 3,
 			expectedUuids: []string{"engine-001", "fuel-001", "wing-001"},
-			expectError: false,
+			expectError:   false,
 		},
 		{
-			name: "filter by non-existent manufacturer country",
-			pf: &model.PartFilter{ManufacturerCountries: []string{"Non-existent"}},
+			name:          "filter by non-existent manufacturer country",
+			pf:            &model.PartFilter{ManufacturerCountries: []string{"Non-existent"}},
 			expectedCount: 0,
 			expectedUuids: []string{},
-			expectError: false,
+			expectError:   false,
 		},
 		{
-			name: "filter by single tag",
-			pf: &model.PartFilter{Tags: []string{"performance"}},
+			name:          "filter by single tag",
+			pf:            &model.PartFilter{Tags: []string{"performance"}},
 			expectedCount: 1,
 			expectedUuids: []string{"engine-001"},
-			expectError: false,
+			expectError:   false,
 		},
 		{
-			name: "filter by multiple tags",
-			pf: &model.PartFilter{Tags: []string{"american", "german"}},
+			name:          "filter by multiple tags",
+			pf:            &model.PartFilter{Tags: []string{"american", "german"}},
 			expectedCount: 2,
 			expectedUuids: []string{"engine-001", "fuel-001"},
-			expectError: false,
+			expectError:   false,
 		},
 		{
-			name: "filter by non-existent tag",
-			pf: &model.PartFilter{Tags: []string{"non-existent"}},
+			name:          "filter by non-existent tag",
+			pf:            &model.PartFilter{Tags: []string{"non-existent"}},
 			expectedCount: 0,
 			expectedUuids: []string{},
-			expectError: false,
+			expectError:   false,
 		},
 		{
-			name: "complex filter - UUID + category",
-			pf: &model.PartFilter{Uuids: []string{"engine-001"}, Categories: []model.Category{model.CategoryEngine}},
+			name:          "complex filter - UUID + category",
+			pf:            &model.PartFilter{Uuids: []string{"engine-001"}, Categories: []model.Category{model.CategoryEngine}},
 			expectedCount: 1,
 			expectedUuids: []string{"engine-001"},
-			expectError: false,
+			expectError:   false,
 		},
 		{
 			name: "complex filter - name + country + tags",
 			pf: &model.PartFilter{
-				Names: []string{"V8 Engine"},
+				Names:                 []string{"V8 Engine"},
 				ManufacturerCountries: []string{"USA"},
-				Tags: []string{"performance"},
+				Tags:                  []string{"performance"},
 			},
 			expectedCount: 1,
 			expectedUuids: []string{"engine-001"},
-			expectError: false,
+			expectError:   false,
 		},
 		{
 			name: "complex filter - conflicting criteria",
 			pf: &model.PartFilter{
-				Uuids: []string{"engine-001"},
+				Uuids:      []string{"engine-001"},
 				Categories: []model.Category{model.CategoryFuel},
 			},
 			expectedCount: 0,
 			expectedUuids: []string{},
-			expectError: false,
+			expectError:   false,
 		},
 		{
 			name: "empty filter arrays",
 			pf: &model.PartFilter{
-				Uuids: []string{},
-				Names: []string{},
-				Categories: []model.Category{},
+				Uuids:                 []string{},
+				Names:                 []string{},
+				Categories:            []model.Category{},
 				ManufacturerCountries: []string{},
-				Tags: []string{},
+				Tags:                  []string{},
 			},
 			expectedCount: 5,
 			expectedUuids: []string{"engine-001", "fuel-001", "wing-001", "porthole-001", "engine-002"},
-			expectError: false,
+			expectError:   false,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			result, err := repo.ListParts(nil, tc.pf)
-			
+			result, err := repo.ListParts(t.Context(), tc.pf)
+
 			if tc.expectError {
 				if err == nil {
 					t.Errorf("expected error but got none")
@@ -265,32 +265,32 @@ func TestListParts(t *testing.T) {
 				}
 				return
 			}
-			
+
 			if err != nil {
 				t.Errorf("unexpected error: %v", err)
 				return
 			}
-			
+
 			if len(result) != tc.expectedCount {
 				t.Errorf("expected %d parts, got %d", tc.expectedCount, len(result))
 			}
-			
+
 			if len(tc.expectedUuids) > 0 {
 				resultUuids := make([]string, len(result))
 				for i, part := range result {
-					resultUuids[i] = part.GetUuid()
+					resultUuids[i] = part.GetUUID()
 				}
-				
-				for _, expectedUuid := range tc.expectedUuids {
+
+				for _, expectedUUID := range tc.expectedUuids {
 					found := false
-					for _, resultUuid := range resultUuids {
-						if resultUuid == expectedUuid {
+					for _, resultUUID := range resultUuids {
+						if resultUUID == expectedUUID {
 							found = true
 							break
 						}
 					}
 					if !found {
-						t.Errorf("expected UUID %s not found in result", expectedUuid)
+						t.Errorf("expected UUID %s not found in result", expectedUUID)
 					}
 				}
 			}

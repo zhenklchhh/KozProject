@@ -5,10 +5,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
+
 	serviceMock "github.com/zhenklchhh/KozProject/inventory/internal/service/mocks"
 )
 
-type ApiSuite struct {
+type APISuite struct {
 	suite.Suite
 
 	ctx     context.Context
@@ -16,15 +17,15 @@ type ApiSuite struct {
 	handler *api
 }
 
-func (s *ApiSuite) SetupTest() {
+func (s *APISuite) SetupTest() {
 	s.ctx = context.Background()
 	s.service = serviceMock.NewInventoryService(s.T())
-	s.handler = NewApi(s.service)
+	s.handler = NewAPI(s.service)
 }
 
-func (s *ApiSuite) TearDownTest() {
+func (s *APISuite) TearDownTest() {
 }
 
 func TestServiceIntegration(t *testing.T) {
-	suite.Run(t, new(ApiSuite))
+	suite.Run(t, new(APISuite))
 }

@@ -101,7 +101,7 @@ func main() {
 
 		log.Printf("📖 Swagger UI available at http://localhost:%d/\n", httpPort)
 		err = gwServer.ListenAndServe()
-		if err != nil && !errors.Is(http.ErrServerClosed, err) {
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Printf("failed to listen server: %v\n", err)
 			return
 		}

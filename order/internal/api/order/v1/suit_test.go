@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
+
 	serviceMock "github.com/zhenklchhh/KozProject/order/internal/service/mocks"
 )
 

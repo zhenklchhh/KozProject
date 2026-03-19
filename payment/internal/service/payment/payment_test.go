@@ -2,6 +2,7 @@ package payment
 
 import (
 	"github.com/brianvoe/gofakeit/v7"
+
 	"github.com/zhenklchhh/KozProject/payment/internal/model"
 )
 

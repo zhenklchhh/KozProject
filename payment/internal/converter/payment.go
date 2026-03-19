@@ -5,7 +5,7 @@ import (
 	paymentV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/payment/v1"
 )
 
-// PayOrderRequestServiceToRepo конвертирует protobuf PayOrderRequest в repository model PayOrderRequest
+// PayOrderRequestServiceToRepo конвертирует protobuf PayOrderRequest в repository model PayOrderRequest.
 func PayOrderRequestServiceToRepo(req *paymentV1.PayOrderRequest) *model.PayOrderRequest {
 	if req == nil {
 		return nil
@@ -18,7 +18,7 @@ func PayOrderRequestServiceToRepo(req *paymentV1.PayOrderRequest) *model.PayOrde
 	}
 }
 
-// PayOrderRequestRepoToService конвертирует repository model PayOrderRequest в protobuf PayOrderRequest
+// PayOrderRequestRepoToService конвертирует repository model PayOrderRequest в protobuf PayOrderRequest.
 func PayOrderRequestRepoToService(req *model.PayOrderRequest) *paymentV1.PayOrderRequest {
 	if req == nil {
 		return nil
@@ -31,9 +31,11 @@ func PayOrderRequestRepoToService(req *model.PayOrderRequest) *paymentV1.PayOrde
 	}
 }
 
-// PaymentMethodServiceToRepo конвертирует protobuf PaymentMethod в repository model PaymentMethod
+// PaymentMethodServiceToRepo конвертирует protobuf PaymentMethod в repository model PaymentMethod.
 func PaymentMethodServiceToRepo(method paymentV1.PaymentMethod) model.PaymentMethod {
 	switch method {
+	case paymentV1.PaymentMethod_PAYMENT_METHOD_UNSPECIFIED:
+		return model.PaymentMethodUnspecified
 	case paymentV1.PaymentMethod_PAYMENT_METHOD_CARD:
 		return model.PaymentMethodCard
 	case paymentV1.PaymentMethod_PAYMENT_METHOD_SBP:
@@ -47,9 +49,11 @@ func PaymentMethodServiceToRepo(method paymentV1.PaymentMethod) model.PaymentMet
 	}
 }
 
-// PaymentMethodRepoToService конвертирует repository model PaymentMethod в protobuf PaymentMethod
+// PaymentMethodRepoToService конвертирует repository model PaymentMethod в protobuf PaymentMethod.
 func PaymentMethodRepoToService(method model.PaymentMethod) paymentV1.PaymentMethod {
 	switch method {
+	case model.PaymentMethodUnspecified:
+		return paymentV1.PaymentMethod_PAYMENT_METHOD_UNSPECIFIED
 	case model.PaymentMethodCard:
 		return paymentV1.PaymentMethod_PAYMENT_METHOD_CARD
 	case model.PaymentMethodSBP:
@@ -63,7 +67,7 @@ func PaymentMethodRepoToService(method model.PaymentMethod) paymentV1.PaymentMet
 	}
 }
 
-// PayOrderResponseServiceToRepo конвертирует protobuf PayOrderResponse в repository model PayOrderResponse
+// PayOrderResponseServiceToRepo конвертирует protobuf PayOrderResponse в repository model PayOrderResponse.
 func PayOrderResponseServiceToRepo(resp *paymentV1.PayOrderResponse) *model.PayOrderResponse {
 	if resp == nil {
 		return nil
@@ -74,7 +78,7 @@ func PayOrderResponseServiceToRepo(resp *paymentV1.PayOrderResponse) *model.PayO
 	}
 }
 
-// PayOrderResponseRepoToService конвертирует repository model PayOrderResponse в protobuf PayOrderResponse
+// PayOrderResponseRepoToService конвертирует repository model PayOrderResponse в protobuf PayOrderResponse.
 func PayOrderResponseRepoToService(resp *model.PayOrderResponse) *paymentV1.PayOrderResponse {
 	if resp == nil {
 		return nil

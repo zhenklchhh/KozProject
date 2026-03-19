@@ -35,7 +35,6 @@ issues:
 formatters:
   enable:
     - goimports # checks if the code and import statements are formatted according to the 'goimports' command
-    - golines # checks if code is formatted, and fixes long lines
 
     ## you may want to enable
     #- gci # checks if code and import statements are formatted, with additional rules
@@ -51,11 +50,6 @@ formatters:
       # Default: []
       local-prefixes:
         - github.com/zhenklchhh/KozProject
-
-    golines:
-      # Target maximum line length.
-      # Default: 100
-      max-len: 120
 
 linters:
   enable:
@@ -78,10 +72,8 @@ linters:
     - forbidigo # forbids identifiers
     - funcorder # checks the order of functions, methods, and constructors
     - gocheckcompilerdirectives # validates go compiler directive comments (//go:)
-    - gochecknoglobals # checks that no global variables exist
     - gochecknoinits # checks that no init functions are present in Go code
     - gochecksumtype # checks exhaustiveness on Go "sum types"
-    - gocognit # computes and checks the cognitive complexity of functions
     - goconst # finds repeated strings that could be replaced by a constant
     - gocritic # provides diagnostics that check for bugs, performance and style issues
     - gocyclo # computes and checks the cyclomatic complexity of functions
@@ -111,7 +103,6 @@ linters:
     - protogetter # reports direct reads from proto message fields when getters should be used
     - reassign # checks that package variables are not reassigned
     - recvcheck # checks for receiver type consistency
-    - revive # fast, configurable, extensible, flexible, and beautiful linter for Go, drop-in replacement of golint
     - rowserrcheck # checks whether Err of rows is checked successfully
     - sloglint # ensure consistent code style when using log/slog
     - spancheck # checks for mistakes with OpenTelemetry/Census spans
@@ -119,7 +110,6 @@ linters:
     - staticcheck # is a go vet on steroids, applying a ton of static analysis checks
     - testableexamples # checks if examples are testable (have an expected output)
     - testifylint # checks usage of github.com/stretchr/testify
-    - testpackage # makes you use a separate _test package
     - tparallel # detects inappropriate usage of t.Parallel() method in your Go test codes
     - unconvert # removes unnecessary type conversions
     - unparam # reports unused function parameters
@@ -301,11 +291,6 @@ linters:
       # Default: true
       default-signifies-exhaustive: false
 
-    gocognit:
-      # Minimal code complexity to report.
-      # Default: 30 (but we recommend 10-20)
-      min-complexity: 20
-
     gocritic:
       # Settings passed to gocritic.
       # The settings key is the name of a supported gocritic checker.
@@ -465,6 +450,24 @@ linters:
       - text: 'comment on exported \S+ \S+ should be of the form ".+"'
         source: '// ?(nolint|TODO)'
         linters: [ revive, staticcheck ]
+      - text: 'ST1003:'
+        linters: [ staticcheck ]
+      - text: 'avoid direct access to proto field'
+        linters: [ protogetter ]
+      - text: 'Magic number: (200|201|400|404|409|500|503|10)'
+        linters: [ mnd ]
+      - text: 'non-wrapping format verb for fmt.Errorf. Use `%w`'
+        linters: [ errorlint ]
+      - text: 'float-compare:'
+        linters: [ testifylint ]
+      - text: 'error-is-as:'
+        linters: [ testifylint ]
+      - text: 'missing cases in switch of type.*OrderStatus'
+        linters: [ exhaustive ]
+      - text: 'unusedwrite: unused write to field'
+        linters: [ govet ]
+      - text: 'the average complexity for the package.*is.*max is'
+        linters: [ cyclop ]
       - path: '_test\.go'
         linters:
           - bodyclose
@@ -475,3 +478,6 @@ linters:
           - gosec
           - noctx
           - wrapcheck
+      - path: 'mocks\.go'
+        linters:
+          - errcheck

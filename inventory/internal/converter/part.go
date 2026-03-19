@@ -3,19 +3,20 @@ package converter
 import (
 	"time"
 
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+
 	"github.com/zhenklchhh/KozProject/inventory/internal/model"
 	inventoryV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/inventory/v1"
-	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// PartServiceToPartRepo конвертирует protobuf Part в repository model Part
+// PartServiceToPartRepo конвертирует protobuf Part в repository model Part.
 func PartServiceToPartRepo(part *inventoryV1.Part) *model.Part {
 	if part == nil {
 		return nil
 	}
 
 	return &model.Part{
-		Uuid:          part.GetUuid(),
+		UUID:          part.GetUuid(),
 		Name:          part.GetName(),
 		Description:   part.GetDescription(),
 		Price:         part.GetPrice(),
@@ -30,9 +31,11 @@ func PartServiceToPartRepo(part *inventoryV1.Part) *model.Part {
 	}
 }
 
-// CategoryServiceToRepo конвертирует protobuf Category в repository model Category
+// CategoryServiceToRepo конвертирует protobuf Category в repository model Category.
 func CategoryServiceToRepo(category inventoryV1.Category) model.Category {
 	switch category {
+	case inventoryV1.Category_CATEGORY_UNSPECIFIED:
+		return model.CategoryUnspecified
 	case inventoryV1.Category_CATEGORY_ENGINE:
 		return model.CategoryEngine
 	case inventoryV1.Category_CATEGORY_FUEL:
@@ -46,7 +49,7 @@ func CategoryServiceToRepo(category inventoryV1.Category) model.Category {
 	}
 }
 
-// DimensionsServiceToRepo конвертирует protobuf Dimensions в repository model Dimensions
+// DimensionsServiceToRepo конвертирует protobuf Dimensions в repository model Dimensions.
 func DimensionsServiceToRepo(dimensions *inventoryV1.Dimensions) *model.Dimensions {
 	if dimensions == nil {
 		return nil
@@ -60,7 +63,7 @@ func DimensionsServiceToRepo(dimensions *inventoryV1.Dimensions) *model.Dimensio
 	}
 }
 
-// ManufacturerServiceToRepo конвертирует protobuf Manufacturer в repository model Manufacturer
+// ManufacturerServiceToRepo конвертирует protobuf Manufacturer в repository model Manufacturer.
 func ManufacturerServiceToRepo(manufacturer *inventoryV1.Manufacturer) *model.Manufacturer {
 	if manufacturer == nil {
 		return nil
@@ -73,7 +76,7 @@ func ManufacturerServiceToRepo(manufacturer *inventoryV1.Manufacturer) *model.Ma
 	}
 }
 
-// ValueServiceToRepo конвертирует protobuf Value в repository model Value
+// ValueServiceToRepo конвертирует protobuf Value в repository model Value.
 func ValueServiceToRepo(value *inventoryV1.Value) *model.Value {
 	if value == nil {
 		return nil
@@ -93,7 +96,7 @@ func ValueServiceToRepo(value *inventoryV1.Value) *model.Value {
 	}
 }
 
-// MetadataServiceToRepo конвертирует protobuf metadata map в repository model metadata map
+// MetadataServiceToRepo конвертирует protobuf metadata map в repository model metadata map.
 func MetadataServiceToRepo(metadata map[string]*inventoryV1.Value) map[string]*model.Value {
 	if metadata == nil {
 		return nil
@@ -106,7 +109,7 @@ func MetadataServiceToRepo(metadata map[string]*inventoryV1.Value) map[string]*m
 	return result
 }
 
-// TimestampServiceToRepo конвертирует protobuf Timestamp в time.Time
+// TimestampServiceToRepo конвертирует protobuf Timestamp в time.Time.
 func TimestampServiceToRepo(timestamp *timestamppb.Timestamp) *time.Time {
 	if timestamp == nil {
 		return nil
@@ -116,7 +119,7 @@ func TimestampServiceToRepo(timestamp *timestamppb.Timestamp) *time.Time {
 	return &t
 }
 
-// PartFilterServiceToRepo конвертирует protobuf PartFilter в repository model PartFilter
+// PartFilterServiceToRepo конвертирует protobuf PartFilter в repository model PartFilter.
 func PartFilterServiceToRepo(filter *inventoryV1.PartFilter) *model.PartFilter {
 	if filter == nil {
 		return nil
@@ -136,14 +139,14 @@ func PartFilterServiceToRepo(filter *inventoryV1.PartFilter) *model.PartFilter {
 	}
 }
 
-// PartRepoToService конвертирует repository model Part в protobuf Part
+// PartRepoToService конвертирует repository model Part в protobuf Part.
 func PartRepoToService(part *model.Part) *inventoryV1.Part {
 	if part == nil {
 		return nil
 	}
 
 	return &inventoryV1.Part{
-		Uuid:          part.Uuid,
+		Uuid:          part.UUID,
 		Name:          part.Name,
 		Description:   part.Description,
 		Price:         part.Price,
@@ -158,9 +161,11 @@ func PartRepoToService(part *model.Part) *inventoryV1.Part {
 	}
 }
 
-// CategoryRepoToService конвертирует repository model Category в protobuf Category
+// CategoryRepoToService конвертирует repository model Category в protobuf Category.
 func CategoryRepoToService(category model.Category) inventoryV1.Category {
 	switch category {
+	case model.CategoryUnspecified:
+		return inventoryV1.Category_CATEGORY_UNSPECIFIED
 	case model.CategoryEngine:
 		return inventoryV1.Category_CATEGORY_ENGINE
 	case model.CategoryFuel:
@@ -174,7 +179,7 @@ func CategoryRepoToService(category model.Category) inventoryV1.Category {
 	}
 }
 
-// DimensionsRepoToService конвертирует repository model Dimensions в protobuf Dimensions
+// DimensionsRepoToService конвертирует repository model Dimensions в protobuf Dimensions.
 func DimensionsRepoToService(dimensions *model.Dimensions) *inventoryV1.Dimensions {
 	if dimensions == nil {
 		return nil
@@ -188,7 +193,7 @@ func DimensionsRepoToService(dimensions *model.Dimensions) *inventoryV1.Dimensio
 	}
 }
 
-// ManufacturerRepoToService конвертирует repository model Manufacturer в protobuf Manufacturer
+// ManufacturerRepoToService конвертирует repository model Manufacturer в protobuf Manufacturer.
 func ManufacturerRepoToService(manufacturer *model.Manufacturer) *inventoryV1.Manufacturer {
 	if manufacturer == nil {
 		return nil
@@ -201,7 +206,7 @@ func ManufacturerRepoToService(manufacturer *model.Manufacturer) *inventoryV1.Ma
 	}
 }
 
-// ValueRepoToService конвертирует repository model Value в protobuf Value
+// ValueRepoToService конвертирует repository model Value в protobuf Value.
 func ValueRepoToService(value *model.Value) *inventoryV1.Value {
 	if value == nil {
 		return nil
@@ -231,7 +236,7 @@ func ValueRepoToService(value *model.Value) *inventoryV1.Value {
 	return nil
 }
 
-// MetadataRepoToService конвертирует repository model metadata map в protobuf metadata map
+// MetadataRepoToService конвертирует repository model metadata map в protobuf metadata map.
 func MetadataRepoToService(metadata map[string]*model.Value) map[string]*inventoryV1.Value {
 	if metadata == nil {
 		return nil
@@ -244,7 +249,7 @@ func MetadataRepoToService(metadata map[string]*model.Value) map[string]*invento
 	return result
 }
 
-// TimestampRepoToService конвертирует time.Time в protobuf Timestamp
+// TimestampRepoToService конвертирует time.Time в protobuf Timestamp.
 func TimestampRepoToService(timestamp *time.Time) *timestamppb.Timestamp {
 	if timestamp == nil {
 		return nil
@@ -253,7 +258,7 @@ func TimestampRepoToService(timestamp *time.Time) *timestamppb.Timestamp {
 	return timestamppb.New(*timestamp)
 }
 
-// PartFilterRepoToService конвертирует repository model PartFilter в protobuf PartFilter
+// PartFilterRepoToService конвертирует repository model PartFilter в protobuf PartFilter.
 func PartFilterRepoToService(filter *model.PartFilter) *inventoryV1.PartFilter {
 	if filter == nil {
 		return nil

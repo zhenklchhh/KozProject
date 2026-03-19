@@ -13,14 +13,14 @@ const (
 )
 
 var (
-	CategoryName = map[Category]string{
+	Category_name = map[Category]string{
 		CategoryUnspecified: "CATEGORY_UNSPECIFIED",
 		CategoryEngine:      "CATEGORY_ENGINE",
 		CategoryFuel:        "CATEGORY_FUEL",
 		CategoryPorthole:    "CATEGORY_PORTHOLE",
 		CategoryWing:        "CATEGORY_WING",
 	}
-	CategoryValue = map[string]Category{
+	Category_value = map[string]Category{
 		"CATEGORY_UNSPECIFIED": CategoryUnspecified,
 		"CATEGORY_ENGINE":      CategoryEngine,
 		"CATEGORY_FUEL":        CategoryFuel,
@@ -54,7 +54,7 @@ type Value struct {
 }
 
 type Part struct {
-	UUID          string
+	Uuid          string
 	Name          string
 	Description   string
 	Price         float64
@@ -68,9 +68,9 @@ type Part struct {
 	UpdatedAt     *time.Time
 }
 
-func (p *Part) GetUUID() string {
-	if p.UUID != "" {
-		return p.UUID
+func (p *Part) GetUuid() string {
+	if p.Uuid != "" {
+		return p.Uuid
 	}
 	return ""
 }

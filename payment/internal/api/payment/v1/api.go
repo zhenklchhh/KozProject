@@ -4,11 +4,12 @@ import (
 	"context"
 
 	"buf.build/go/protovalidate"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
 	"github.com/zhenklchhh/KozProject/payment/internal/converter"
 	pService "github.com/zhenklchhh/KozProject/payment/internal/service"
 	paymentV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/payment/v1"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type api struct {

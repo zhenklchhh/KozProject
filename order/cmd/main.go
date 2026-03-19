@@ -13,23 +13,47 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/joho/godotenv"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	orderApi "github.com/zhenklchhh/KozProject/order/internal/api/order/v1"
+	invClient "github.com/zhenklchhh/KozProject/order/internal/client/inventory/v1"
+	payClient "github.com/zhenklchhh/KozProject/order/internal/client/payment/v1"
 	"github.com/zhenklchhh/KozProject/order/internal/repository/order"
 	service "github.com/zhenklchhh/KozProject/order/internal/service/order"
 	orderV1 "github.com/zhenklchhh/KozProject/shared/pkg/api/order/v1"
+	inventoryV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/inventory/v1"
+	paymentV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/payment/v1"
 )
 
 const (
-	httpPort          = "8080"
-	readHeaderTimeout = 5 * time.Second
-	shutdownTimeout   = 10 * time.Second
+	httpPort           = "8080"
+	readHeaderTimeout  = 5 * time.Second
+	shutdownTimeout    = 10 * time.Second
+	inventoryClientUri = "INVENTORY_CLIENT_URI"
+	paymentClientUri   = "PAYMENT_CLIENT_URI"
 )
 
 func main() {
 	repo := order.NewRepository()
-	svc := service.NewService(repo)
-	apiHandler := orderApi.NewApi(svc,nil,nil)
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Printf("Error loading .env file: %v\n", err)
+		return
+	}
+	connInv, err := grpc.NewClient(os.Getenv(inventoryClientUri), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("failed to create inventory client connection: %v", err)
+	}
+	connPay, err := grpc.NewClient(os.Getenv(paymentClientUri), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("failed to create payment client connection: %v", err)
+	}
+	inventoryClient := invClient.NewClient(inventoryV1.NewInventoryServiceClient(connInv))
+	paymentClient := payClient.NewClient(paymentV1.NewPaymentServiceClient(connPay))
+	svc := service.NewService(repo, paymentClient, inventoryClient)
+	apiHandler := orderApi.NewApi(svc)
 	apiServer, err := orderV1.NewServer(apiHandler)
 	if err != nil {
 		log.Fatalf("ошибка создания сервера OpenAPI: %v", err)

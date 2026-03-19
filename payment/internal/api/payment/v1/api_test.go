@@ -2,10 +2,11 @@ package api
 
 import (
 	"github.com/brianvoe/gofakeit/v7"
-	"github.com/zhenklchhh/KozProject/payment/internal/model"
-	paymentV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/payment/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"github.com/zhenklchhh/KozProject/payment/internal/model"
+	paymentV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/payment/v1"
 )
 
 type testCase struct {

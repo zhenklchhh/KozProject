@@ -6,6 +6,7 @@ import (
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/mock"
+
 	"github.com/zhenklchhh/KozProject/order/internal/model"
 	orderV1 "github.com/zhenklchhh/KozProject/shared/pkg/api/order/v1"
 )
@@ -155,8 +156,8 @@ func (s *ApiSuit) TestPayOrderServiceError() {
 
 func (s *ApiSuit) TestPayOrderDifferentPaymentMethods() {
 	testCases := []struct {
-		name           string
-		paymentMethod  orderV1.PaymentMethod
+		name          string
+		paymentMethod orderV1.PaymentMethod
 	}{
 		{
 			name:          "credit card",
@@ -183,11 +184,10 @@ func (s *ApiSuit) TestPayOrderDifferentPaymentMethods() {
 			resp, err := s.handler.PayOrder(s.ctx, req, params)
 			s.Require().NoError(err)
 			s.Require().NotNil(resp)
-			
+
 			payResp := resp.(*orderV1.PayOrderResponse)
 			s.Require().Equal(payResp.TransactionUUID, transactionUUID)
 			s.service.AssertCalled(s.T(), "PayOrder", s.ctx, mock.AnythingOfType("*model.PayOrderRequest"), orderUUID)
 		})
 	}
 }
-

@@ -12,14 +12,14 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	invPartApi "github.com/zhenklchhh/KozProject/inventory/internal/api/inventory/v1"
 	invPartRepo "github.com/zhenklchhh/KozProject/inventory/internal/repository/part"
 	invPartService "github.com/zhenklchhh/KozProject/inventory/internal/service/part"
-	invPartApi "github.com/zhenklchhh/KozProject/inventory/internal/api/inventory/v1"
 	inventoryV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/inventory/v1"
 )
 
@@ -43,11 +43,11 @@ func main() {
 	s := grpc.NewServer()
 	repo := invPartRepo.NewRepository()
 	service := invPartService.NewService(repo)
-	apiHandler := invPartApi.NewApi(service)
+	apiHandler := invPartApi.NewAPI(service)
 	inventoryV1.RegisterInventoryServiceServer(s, apiHandler)
 	reflection.Register(s)
 	go func() {
-		err := s.Serve(lis)
+		err = s.Serve(lis)
 		if err != nil {
 			log.Printf("failed to serve server: %v\n", err)
 			return
@@ -99,7 +99,7 @@ func main() {
 
 		log.Printf("📖 Swagger UI available at http://localhost:%d/\n", httpPort)
 		err = gwServer.ListenAndServe()
-		if err != nil && !errors.Is(http.ErrServerClosed, err) {
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Printf("failed to listen server: %v\n", err)
 			return
 		}

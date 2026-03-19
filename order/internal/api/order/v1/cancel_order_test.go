@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/brianvoe/gofakeit/v7"
+
 	"github.com/zhenklchhh/KozProject/order/internal/model"
 	orderV1 "github.com/zhenklchhh/KozProject/shared/pkg/api/order/v1"
 )

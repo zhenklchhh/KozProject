@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
+
 	repoMock "github.com/zhenklchhh/KozProject/inventory/internal/repository/mocks"
 )
 

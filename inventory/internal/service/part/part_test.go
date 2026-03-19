@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/brianvoe/gofakeit/v7"
+
 	"github.com/zhenklchhh/KozProject/inventory/internal/model"
 )
 
@@ -18,7 +19,7 @@ func (s *ServiceSuite) TestGetPartSuccess() {
 		},
 	}
 	partUUID := gofakeit.UUID()
-	tc.part.Uuid = partUUID
+	tc.part.UUID = partUUID
 	s.invRepo.On("GetPart", s.ctx, partUUID).Return(tc.part, nil)
 	resp, err := s.service.GetPart(s.ctx, partUUID)
 	s.Require().Equal(resp, tc.part)
@@ -36,19 +37,19 @@ func (s *ServiceSuite) TestGetPartRepoError() {
 }
 
 func (s *ServiceSuite) TestListPartsSuccess() {
-	partUuids := []string {gofakeit.UUID(), gofakeit.UUID()}
+	partUuids := []string{gofakeit.UUID(), gofakeit.UUID()}
 	pf := &model.PartFilter{Uuids: partUuids}
 	parts := []*model.Part{
 		{
-			Uuid: partUuids[0],
-			Name: "shovel",
-			Price: 22.3,
+			UUID:     partUuids[0],
+			Name:     "shovel",
+			Price:    22.3,
 			Category: model.CategoryUnspecified,
 		},
 		{
-			Uuid: partUuids[1],
-			Name: "gas",
-			Price: 100.8,
+			UUID:     partUuids[1],
+			Name:     "gas",
+			Price:    100.8,
 			Category: model.CategoryFuel,
 		},
 	}
@@ -61,7 +62,7 @@ func (s *ServiceSuite) TestListPartsSuccess() {
 }
 
 func (s *ServiceSuite) TestListPartsErr() {
-	partUuids := []string {gofakeit.UUID(), gofakeit.UUID()}
+	partUuids := []string{gofakeit.UUID(), gofakeit.UUID()}
 	pf := &model.PartFilter{Uuids: partUuids}
 
 	s.invRepo.On("ListParts", s.ctx, pf).Return(nil, errors.New("repo err"))
@@ -70,5 +71,3 @@ func (s *ServiceSuite) TestListPartsErr() {
 	s.Require().Error(err)
 	s.invRepo.AssertCalled(s.T(), "ListParts", s.ctx, pf)
 }
-
-

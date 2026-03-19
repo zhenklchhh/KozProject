@@ -39,9 +39,26 @@ const (
 type PaymentMethod string
 
 const (
-	PaymentMethodCard           PaymentMethod = "PAYMENT_METHOD_CARD"
-	PaymentMethodSBP            PaymentMethod = "PAYMENT_METHOD_SBP"
-	PaymentMethodCreditCard     PaymentMethod = "PAYMENT_METHOD_CREDIT_CARD"
-	PaymentMethodInvestorMoney  PaymentMethod = "PAYMENT_METHOD_INVESTOR_MONEY"
+	PaymentMethodCard          PaymentMethod = "PAYMENT_METHOD_CARD"
+	PaymentMethodSBP           PaymentMethod = "PAYMENT_METHOD_SBP"
+	PaymentMethodCreditCard    PaymentMethod = "PAYMENT_METHOD_CREDIT_CARD"
+	PaymentMethodInvestorMoney PaymentMethod = "PAYMENT_METHOD_INVESTOR_MONEY"
 )
 
+type PayOrderServiceRequest struct {
+	OrderUuid     string
+	UserUuid      string
+	PaymentMethod PaymentMethod
+}
+
+func (o *Order) SetStatus(status OrderStatus) {
+	o.Status = status
+}
+
+func (o *Order) SetTransactionUUID(uuid string) {
+	o.TransactionUUID = &uuid
+}
+
+func (o *Order) SetPaymentMethod(m PaymentMethod) {
+	o.PaymentMethod = &m
+}

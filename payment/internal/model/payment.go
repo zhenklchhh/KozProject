@@ -22,9 +22,9 @@ const (
 
 var (
 	PaymentMethod_name = map[PaymentMethod]string{
-		PaymentMethodUnspecified:    "PAYMENT_METHOD_UNSPECIFIED",
-		PaymentMethodCard:           "PAYMENT_METHOD_CARD",
-		PaymentMethodSBP:            "PAYMENT_METHOD_SBP",
+		PaymentMethodUnspecified:   "PAYMENT_METHOD_UNSPECIFIED",
+		PaymentMethodCard:          "PAYMENT_METHOD_CARD",
+		PaymentMethodSBP:           "PAYMENT_METHOD_SBP",
 		PaymentMethodCreditCard:    "PAYMENT_METHOD_CREDIT_CARD",
 		PaymentMethodInvestorMoney: "PAYMENT_METHOD_INVESTOR_MONEY",
 	}
@@ -36,4 +36,3 @@ var (
 		"PAYMENT_METHOD_INVESTOR_MONEY": PaymentMethodInvestorMoney,
 	}
 )
-

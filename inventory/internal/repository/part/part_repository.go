@@ -18,7 +18,7 @@ func NewRepository() *repository {
 	}
 }
 
-func (r *repository) GetStorage() *InventoryStorage{
+func (r *repository) GetStorage() *InventoryStorage {
 	return r.invStorage
 }
 
@@ -54,11 +54,12 @@ func (s *InventoryStorage) Get(id string) (*invModel.Part, bool) {
 func (s *InventoryStorage) Save(part *invModel.Part) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.storage[part.GetUuid()] = part
+	s.storage[part.GetUUID()] = part
 }
 
 func (s *repository) GetPart(_ context.Context,
-	uuid string) (*invModel.Part, error) {
+	uuid string,
+) (*invModel.Part, error) {
 	v, ok := s.invStorage.Get(uuid)
 	if !ok {
 		return nil, fmt.Errorf("inventory service: part %s not found ", uuid)
@@ -67,10 +68,11 @@ func (s *repository) GetPart(_ context.Context,
 }
 
 func (s *repository) ListParts(_ context.Context,
-	pf *invModel.PartFilter) ([]*invModel.Part, error) {
+	pf *invModel.PartFilter,
+) ([]*invModel.Part, error) {
 	var result []*invModel.Part
 	for _, part := range s.invStorage.GetAll() {
-		if len(pf.GetUuids()) > 0 && !contains(pf.GetUuids(), part.GetUuid()) {
+		if len(pf.GetUuids()) > 0 && !contains(pf.GetUuids(), part.GetUUID()) {
 			continue
 		}
 		if len(pf.GetNames()) > 0 && !contains(pf.GetNames(), part.GetName()) {

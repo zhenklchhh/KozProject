@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
+
 	repositoryMocks "github.com/zhenklchhh/KozProject/payment/internal/repository/mocks"
 )
 
@@ -22,7 +23,6 @@ func (s *ServiceSuit) SetupTest() {
 }
 
 func (s *ServiceSuit) TearDownTest() {
-
 }
 
 func TestServiceIntegration(t *testing.T) {
