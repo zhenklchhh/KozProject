@@ -61,6 +61,23 @@ tasks:
       - test -x {{.GOFUMPT}}
       - test -x {{.GCI}}
 
+  test:
+    desc: "Запускает юнит-тесты для всех модулей"
+    summary: |
+      Запускает юнит-тесты для указанных модулей проекта.
+      Можно указать конкретные модули через переменную MODULES.
+    cmds:
+      - |
+        ERR=0
+        for mod in {{.MODULES}}; do
+          if [ -d "$mod" ]; then
+            echo "🧪 Тестируем модуль $mod"
+            go test -v ./$mod/... || ERR=1
+          fi
+        done
+        exit $ERR
+
+
   format:
     desc: "Форматирует весь проект gofumpt + gci, исключая mocks"
     deps: [install-formatters]
