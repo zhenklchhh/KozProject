@@ -5,11 +5,9 @@ import (
 
 	"github.com/zhenklchhh/KozProject/inventory/internal/model"
 	"github.com/zhenklchhh/KozProject/inventory/internal/repository"
-	inventoryV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/inventory/v1"
 )
 
 type service struct {
-	inventoryV1.UnimplementedInventoryServiceServer
 	repo repository.InventoryRepository
 }
 
