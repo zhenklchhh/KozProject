@@ -10,7 +10,7 @@ import (
 	orderV1 "github.com/zhenklchhh/KozProject/shared/pkg/api/order/v1"
 )
 
-func (s *ApiSuit) TestCancelOrderSuccess() {
+func (s *ApiSuite) TestCancelOrderSuccess() {
 	orderUUID := gofakeit.UUID()
 
 	tc := &struct {
@@ -30,7 +30,7 @@ func (s *ApiSuit) TestCancelOrderSuccess() {
 	s.service.AssertCalled(s.T(), "CancelOrder", s.ctx, tc.req.OrderUUID)
 }
 
-func (s *ApiSuit) TestCancelOrderNotFound() {
+func (s *ApiSuite) TestCancelOrderNotFound() {
 	orderUUID := gofakeit.UUID()
 
 	tc := &struct {
@@ -53,7 +53,7 @@ func (s *ApiSuit) TestCancelOrderNotFound() {
 	s.service.AssertCalled(s.T(), "CancelOrder", s.ctx, tc.req.OrderUUID)
 }
 
-func (s *ApiSuit) TestCancelOrderInvalidStatus() {
+func (s *ApiSuite) TestCancelOrderInvalidStatus() {
 	orderUUID := gofakeit.UUID()
 
 	tc := &struct {
@@ -76,7 +76,7 @@ func (s *ApiSuit) TestCancelOrderInvalidStatus() {
 	s.service.AssertCalled(s.T(), "CancelOrder", s.ctx, tc.req.OrderUUID)
 }
 
-func (s *ApiSuit) TestCancelOrderServiceError() {
+func (s *ApiSuite) TestCancelOrderServiceError() {
 	orderUUID := gofakeit.UUID()
 
 	tc := &struct {

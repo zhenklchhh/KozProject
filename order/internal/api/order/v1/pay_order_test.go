@@ -11,7 +11,7 @@ import (
 	orderV1 "github.com/zhenklchhh/KozProject/shared/pkg/api/order/v1"
 )
 
-func (s *ApiSuit) TestPayOrderSuccess() {
+func (s *ApiSuite) TestPayOrderSuccess() {
 	orderUUID := gofakeit.UUID()
 	transactionUUID := gofakeit.UUID()
 	paymentMethod := orderV1.PaymentMethodPAYMENTMETHODCREDITCARD
@@ -42,7 +42,7 @@ func (s *ApiSuit) TestPayOrderSuccess() {
 	s.service.AssertCalled(s.T(), "PayOrder", s.ctx, mock.AnythingOfType("*model.PayOrderRequest"), orderUUID)
 }
 
-func (s *ApiSuit) TestPayOrderNotFound() {
+func (s *ApiSuite) TestPayOrderNotFound() {
 	orderUUID := gofakeit.UUID()
 	paymentMethod := orderV1.PaymentMethodPAYMENTMETHODCREDITCARD
 
@@ -70,7 +70,7 @@ func (s *ApiSuit) TestPayOrderNotFound() {
 	s.service.AssertCalled(s.T(), "PayOrder", s.ctx, mock.AnythingOfType("*model.PayOrderRequest"), orderUUID)
 }
 
-func (s *ApiSuit) TestPayOrderInvalidStatus() {
+func (s *ApiSuite) TestPayOrderInvalidStatus() {
 	orderUUID := gofakeit.UUID()
 	paymentMethod := orderV1.PaymentMethodPAYMENTMETHODCREDITCARD
 
@@ -98,7 +98,7 @@ func (s *ApiSuit) TestPayOrderInvalidStatus() {
 	s.service.AssertCalled(s.T(), "PayOrder", s.ctx, mock.AnythingOfType("*model.PayOrderRequest"), orderUUID)
 }
 
-func (s *ApiSuit) TestPayOrderInvalidPaymentMethod() {
+func (s *ApiSuite) TestPayOrderInvalidPaymentMethod() {
 	orderUUID := gofakeit.UUID()
 	paymentMethod := orderV1.PaymentMethodPAYMENTMETHODCREDITCARD
 
@@ -126,7 +126,7 @@ func (s *ApiSuit) TestPayOrderInvalidPaymentMethod() {
 	s.service.AssertCalled(s.T(), "PayOrder", s.ctx, mock.AnythingOfType("*model.PayOrderRequest"), orderUUID)
 }
 
-func (s *ApiSuit) TestPayOrderServiceError() {
+func (s *ApiSuite) TestPayOrderServiceError() {
 	orderUUID := gofakeit.UUID()
 	paymentMethod := orderV1.PaymentMethodPAYMENTMETHODCREDITCARD
 
@@ -154,7 +154,7 @@ func (s *ApiSuit) TestPayOrderServiceError() {
 	s.service.AssertCalled(s.T(), "PayOrder", s.ctx, mock.AnythingOfType("*model.PayOrderRequest"), orderUUID)
 }
 
-func (s *ApiSuit) TestPayOrderDifferentPaymentMethods() {
+func (s *ApiSuite) TestPayOrderDifferentPaymentMethods() {
 	testCases := []struct {
 		name          string
 		paymentMethod orderV1.PaymentMethod

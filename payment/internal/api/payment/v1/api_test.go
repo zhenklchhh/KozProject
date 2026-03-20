@@ -15,7 +15,7 @@ type testCase struct {
 	expectedErr  error
 }
 
-func (s *ApiSuit) TestPayOrderValidRequest() {
+func (s *ApiSuite) TestPayOrderValidRequest() {
 	tc := &testCase{
 		req: &paymentV1.PayOrderRequest{
 			OrderUuid:     gofakeit.UUID(),
@@ -35,7 +35,7 @@ func (s *ApiSuit) TestPayOrderValidRequest() {
 	s.Require().NoError(err)
 }
 
-func (s *ApiSuit) TestPayOrderInvalidRequest() {
+func (s *ApiSuite) TestPayOrderInvalidRequest() {
 	tc := &testCase{
 		req: &paymentV1.PayOrderRequest{
 			OrderUuid:     "",

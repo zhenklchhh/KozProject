@@ -9,7 +9,7 @@ import (
 	serviceMock "github.com/zhenklchhh/KozProject/order/internal/service/mocks"
 )
 
-type ApiSuit struct {
+type ApiSuite struct {
 	suite.Suite
 
 	ctx     context.Context
@@ -17,15 +17,15 @@ type ApiSuit struct {
 	handler *api
 }
 
-func (s *ApiSuit) SetupTest() {
+func (s *ApiSuite) SetupTest() {
 	s.ctx = context.Background()
 	s.service = serviceMock.NewOrderService(s.T())
 	s.handler = NewApi(s.service)
 }
 
-func (s *ApiSuit) TearDownTest() {
+func (s *ApiSuite) TearDownTest() {
 }
 
 func TestApiIntegration(t *testing.T) {
-	suite.Run(t, new(ApiSuit))
+	suite.Run(t, new(ApiSuite))
 }

@@ -10,7 +10,7 @@ import (
 	orderV1 "github.com/zhenklchhh/KozProject/shared/pkg/api/order/v1"
 )
 
-func (s *ApiSuit) TestCreateOrderSuccess() {
+func (s *ApiSuite) TestCreateOrderSuccess() {
 	userUUID := gofakeit.UUID()
 	partUuids := []string{gofakeit.UUID(), gofakeit.UUID()}
 	orderUUID := gofakeit.UUID()
@@ -45,7 +45,7 @@ func (s *ApiSuit) TestCreateOrderSuccess() {
 	s.service.AssertCalled(s.T(), "Create", s.ctx, mock.AnythingOfType("*model.CreateOrderRequest"))
 }
 
-func (s *ApiSuit) TestCreateOrderServiceError() {
+func (s *ApiSuite) TestCreateOrderServiceError() {
 	userUUID := gofakeit.UUID()
 	partUuids := []string{gofakeit.UUID(), gofakeit.UUID()}
 
@@ -70,7 +70,7 @@ func (s *ApiSuit) TestCreateOrderServiceError() {
 	s.service.AssertCalled(s.T(), "Create", s.ctx, mock.AnythingOfType("*model.CreateOrderRequest"))
 }
 
-func (s *ApiSuit) TestCreateOrderEmptyPartUuids() {
+func (s *ApiSuite) TestCreateOrderEmptyPartUuids() {
 	userUUID := gofakeit.UUID()
 	orderUUID := gofakeit.UUID()
 
@@ -103,7 +103,7 @@ func (s *ApiSuit) TestCreateOrderEmptyPartUuids() {
 	s.service.AssertCalled(s.T(), "Create", s.ctx, mock.AnythingOfType("*model.CreateOrderRequest"))
 }
 
-func (s *ApiSuit) TestCreateOrderSinglePart() {
+func (s *ApiSuite) TestCreateOrderSinglePart() {
 	userUUID := gofakeit.UUID()
 	partUuid := gofakeit.UUID()
 	orderUUID := gofakeit.UUID()
@@ -138,7 +138,7 @@ func (s *ApiSuit) TestCreateOrderSinglePart() {
 	s.service.AssertCalled(s.T(), "Create", s.ctx, mock.AnythingOfType("*model.CreateOrderRequest"))
 }
 
-func (s *ApiSuit) TestCreateOrderMultipleParts() {
+func (s *ApiSuite) TestCreateOrderMultipleParts() {
 	userUUID := gofakeit.UUID()
 	partUuids := []string{gofakeit.UUID(), gofakeit.UUID(), gofakeit.UUID()}
 	orderUUID := gofakeit.UUID()

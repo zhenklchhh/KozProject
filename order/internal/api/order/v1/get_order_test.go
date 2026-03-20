@@ -10,7 +10,7 @@ import (
 	orderV1 "github.com/zhenklchhh/KozProject/shared/pkg/api/order/v1"
 )
 
-func (s *ApiSuit) TestGetOrderSuccess() {
+func (s *ApiSuite) TestGetOrderSuccess() {
 	orderUUID := gofakeit.UUID()
 	userUUID := gofakeit.UUID()
 	partUuids := []string{gofakeit.UUID(), gofakeit.UUID()}
@@ -58,7 +58,7 @@ func (s *ApiSuit) TestGetOrderSuccess() {
 	s.service.AssertCalled(s.T(), "Get", s.ctx, orderUUID)
 }
 
-func (s *ApiSuit) TestGetOrderNotFound() {
+func (s *ApiSuite) TestGetOrderNotFound() {
 	orderUUID := gofakeit.UUID()
 
 	tc := &struct {
@@ -80,7 +80,7 @@ func (s *ApiSuit) TestGetOrderNotFound() {
 	s.service.AssertCalled(s.T(), "Get", s.ctx, orderUUID)
 }
 
-func (s *ApiSuit) TestGetOrderPendingPaymentStatus() {
+func (s *ApiSuite) TestGetOrderPendingPaymentStatus() {
 	orderUUID := gofakeit.UUID()
 	userUUID := gofakeit.UUID()
 	partUuids := []string{gofakeit.UUID(), gofakeit.UUID()}
@@ -123,7 +123,7 @@ func (s *ApiSuit) TestGetOrderPendingPaymentStatus() {
 	s.service.AssertCalled(s.T(), "Get", s.ctx, orderUUID)
 }
 
-func (s *ApiSuit) TestGetOrderCancelledStatus() {
+func (s *ApiSuite) TestGetOrderCancelledStatus() {
 	orderUUID := gofakeit.UUID()
 	userUUID := gofakeit.UUID()
 	partUuids := []string{gofakeit.UUID(), gofakeit.UUID()}

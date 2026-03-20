@@ -11,7 +11,7 @@ type testCase struct {
 	expectedUUID string
 }
 
-func (s *ServiceSuit) TestPayOrderValidRequest() {
+func (s *ServiceSuite) TestPayOrderValidRequest() {
 	tc := &testCase{
 		req: &model.PayOrderRequest{
 			OrderUuid:     gofakeit.UUID(),
@@ -26,7 +26,7 @@ func (s *ServiceSuit) TestPayOrderValidRequest() {
 	s.Require().NoError(err)
 }
 
-func (s *ServiceSuit) TestPayOrderInvalidRequest() {
+func (s *ServiceSuite) TestPayOrderInvalidRequest() {
 	tc := &testCase{
 		req: &model.PayOrderRequest{
 			OrderUuid:     "",

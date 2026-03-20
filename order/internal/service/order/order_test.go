@@ -16,7 +16,7 @@ import (
 	paymentV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/payment/v1"
 )
 
-type OrderServiceSuit struct {
+type OrderServiceSuite struct {
 	suite.Suite
 
 	ctx             context.Context
@@ -26,7 +26,7 @@ type OrderServiceSuit struct {
 	service         *service
 }
 
-func (s *OrderServiceSuit) SetupTest() {
+func (s *OrderServiceSuite) SetupTest() {
 	s.ctx = context.Background()
 	s.repo = repoMock.NewOrderRepository(s.T())
 	s.paymentClient = &client.MockPaymentClient{}
@@ -34,16 +34,16 @@ func (s *OrderServiceSuit) SetupTest() {
 	s.service = NewService(s.repo, s.paymentClient, s.inventoryClient)
 }
 
-func (s *OrderServiceSuit) TearDownTest() {
+func (s *OrderServiceSuite) TearDownTest() {
 }
 
 func TestOrderServiceIntegration(t *testing.T) {
-	suite.Run(t, new(OrderServiceSuit))
+	suite.Run(t, new(OrderServiceSuite))
 }
 
 // Create Order Tests
 
-func (s *OrderServiceSuit) TestCreateOrderSuccess() {
+func (s *OrderServiceSuite) TestCreateOrderSuccess() {
 	userUUID := gofakeit.UUID()
 	partUuids := []string{gofakeit.UUID(), gofakeit.UUID()}
 	parts := []*inventoryV1.Part{
@@ -69,7 +69,7 @@ func (s *OrderServiceSuit) TestCreateOrderSuccess() {
 	s.repo.AssertCalled(s.T(), "Create", s.ctx, mock.AnythingOfType("*model.Order"))
 }
 
-func (s *OrderServiceSuit) TestCreateOrderInventoryClientError() {
+func (s *OrderServiceSuite) TestCreateOrderInventoryClientError() {
 	userUUID := gofakeit.UUID()
 	partUuids := []string{gofakeit.UUID(), gofakeit.UUID()}
 
@@ -89,7 +89,7 @@ func (s *OrderServiceSuit) TestCreateOrderInventoryClientError() {
 	s.repo.AssertNotCalled(s.T(), "Create", s.ctx, mock.Anything)
 }
 
-func (s *OrderServiceSuit) TestCreateOrderRepositoryError() {
+func (s *OrderServiceSuite) TestCreateOrderRepositoryError() {
 	userUUID := gofakeit.UUID()
 	partUuids := []string{gofakeit.UUID(), gofakeit.UUID()}
 	parts := []*inventoryV1.Part{
@@ -114,7 +114,7 @@ func (s *OrderServiceSuit) TestCreateOrderRepositoryError() {
 	s.repo.AssertCalled(s.T(), "Create", s.ctx, mock.AnythingOfType("*model.Order"))
 }
 
-func (s *OrderServiceSuit) TestCreateOrderEmptyParts() {
+func (s *OrderServiceSuite) TestCreateOrderEmptyParts() {
 	userUUID := gofakeit.UUID()
 	partUuids := []string{}
 
@@ -138,7 +138,7 @@ func (s *OrderServiceSuit) TestCreateOrderEmptyParts() {
 
 // Get Order Tests
 
-func (s *OrderServiceSuit) TestGetOrderSuccess() {
+func (s *OrderServiceSuite) TestGetOrderSuccess() {
 	orderUUID := gofakeit.UUID()
 	order := &model.Order{
 		OrderUUID:  orderUUID,
@@ -157,7 +157,7 @@ func (s *OrderServiceSuit) TestGetOrderSuccess() {
 	s.repo.AssertCalled(s.T(), "Get", s.ctx, orderUUID)
 }
 
-func (s *OrderServiceSuit) TestGetOrderNotFound() {
+func (s *OrderServiceSuite) TestGetOrderNotFound() {
 	orderUUID := gofakeit.UUID()
 
 	s.repo.On("Get", s.ctx, orderUUID).Return(nil, errors.New("not found"))
@@ -171,7 +171,7 @@ func (s *OrderServiceSuit) TestGetOrderNotFound() {
 
 // Pay Order Tests
 
-func (s *OrderServiceSuit) TestPayOrderSuccess() {
+func (s *OrderServiceSuite) TestPayOrderSuccess() {
 	orderUUID := gofakeit.UUID()
 	userUUID := gofakeit.UUID()
 	transactionUUID := gofakeit.UUID()
@@ -205,7 +205,7 @@ func (s *OrderServiceSuit) TestPayOrderSuccess() {
 	s.repo.AssertCalled(s.T(), "Create", s.ctx, mock.AnythingOfType("*model.Order"))
 }
 
-func (s *OrderServiceSuit) TestPayOrderNotFound() {
+func (s *OrderServiceSuite) TestPayOrderNotFound() {
 	orderUUID := gofakeit.UUID()
 	paymentMethod := model.PaymentMethodCreditCard
 
@@ -225,7 +225,7 @@ func (s *OrderServiceSuit) TestPayOrderNotFound() {
 	s.repo.AssertNotCalled(s.T(), "Create", s.ctx, mock.Anything)
 }
 
-func (s *OrderServiceSuit) TestPayOrderInvalidStatus() {
+func (s *OrderServiceSuite) TestPayOrderInvalidStatus() {
 	orderUUID := gofakeit.UUID()
 	paymentMethod := model.PaymentMethodCreditCard
 
@@ -253,7 +253,7 @@ func (s *OrderServiceSuit) TestPayOrderInvalidStatus() {
 	s.repo.AssertNotCalled(s.T(), "Create", s.ctx, mock.Anything)
 }
 
-func (s *OrderServiceSuit) TestPayOrderInvalidPaymentMethod() {
+func (s *OrderServiceSuite) TestPayOrderInvalidPaymentMethod() {
 	orderUUID := gofakeit.UUID()
 	paymentMethod := model.PaymentMethod("INVALID_METHOD")
 
@@ -281,7 +281,7 @@ func (s *OrderServiceSuit) TestPayOrderInvalidPaymentMethod() {
 	s.repo.AssertNotCalled(s.T(), "Create", s.ctx, mock.Anything)
 }
 
-func (s *OrderServiceSuit) TestPayOrderPaymentClientError() {
+func (s *OrderServiceSuite) TestPayOrderPaymentClientError() {
 	orderUUID := gofakeit.UUID()
 	userUUID := gofakeit.UUID()
 	paymentMethod := model.PaymentMethodCreditCard
@@ -311,7 +311,7 @@ func (s *OrderServiceSuit) TestPayOrderPaymentClientError() {
 	s.repo.AssertNotCalled(s.T(), "Create", s.ctx, mock.Anything)
 }
 
-func (s *OrderServiceSuit) TestPayOrderUpdateError() {
+func (s *OrderServiceSuite) TestPayOrderUpdateError() {
 	orderUUID := gofakeit.UUID()
 	userUUID := gofakeit.UUID()
 	transactionUUID := gofakeit.UUID()
@@ -347,7 +347,7 @@ func (s *OrderServiceSuit) TestPayOrderUpdateError() {
 
 // Cancel Order Tests
 
-func (s *OrderServiceSuit) TestCancelOrderSuccess() {
+func (s *OrderServiceSuite) TestCancelOrderSuccess() {
 	orderUUID := gofakeit.UUID()
 
 	order := &model.Order{
@@ -368,7 +368,7 @@ func (s *OrderServiceSuit) TestCancelOrderSuccess() {
 	s.repo.AssertCalled(s.T(), "Create", s.ctx, mock.AnythingOfType("*model.Order"))
 }
 
-func (s *OrderServiceSuit) TestCancelOrderNotFound() {
+func (s *OrderServiceSuite) TestCancelOrderNotFound() {
 	orderUUID := gofakeit.UUID()
 
 	s.repo.On("Get", s.ctx, orderUUID).Return(nil, errors.New("not found"))
@@ -381,7 +381,7 @@ func (s *OrderServiceSuit) TestCancelOrderNotFound() {
 	s.repo.AssertNotCalled(s.T(), "Create", s.ctx, mock.Anything)
 }
 
-func (s *OrderServiceSuit) TestCancelOrderInvalidStatus() {
+func (s *OrderServiceSuite) TestCancelOrderInvalidStatus() {
 	orderUUID := gofakeit.UUID()
 
 	order := &model.Order{
@@ -402,7 +402,7 @@ func (s *OrderServiceSuit) TestCancelOrderInvalidStatus() {
 	s.repo.AssertNotCalled(s.T(), "Create", s.ctx, mock.Anything)
 }
 
-func (s *OrderServiceSuit) TestCancelOrderUpdateError() {
+func (s *OrderServiceSuite) TestCancelOrderUpdateError() {
 	orderUUID := gofakeit.UUID()
 
 	order := &model.Order{
