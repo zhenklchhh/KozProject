@@ -1,0 +1,13 @@
+version: '3.9'
+services:
+  placeholder:
+    image: alpine
+    command:
+      ["sh", "-c", "echo 'core network setting up' && sleep infinity"]
+    networks:
+      - core-network
+
+networks:
+  core-network:
+    name: core-network
+    external: true
