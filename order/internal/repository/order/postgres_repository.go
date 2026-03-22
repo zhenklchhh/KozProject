@@ -5,17 +5,24 @@ import (
 	"fmt"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/lib/pq"
 	"github.com/zhenklchhh/KozProject/order/internal/model"
 )
 
 type PostgresRepository struct {
-	pool *pgxpool.Pool
+	pool PgxPool
 	sq   squirrel.StatementBuilderType
 }
 
-func NewPostgresRepository(pool *pgxpool.Pool) *PostgresRepository {
+type PgxPool interface {
+	Exec(ctx context.Context, sql string, args ...any) (pgconn.CommandTag, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+}
+
+func NewPostgresRepository(pool PgxPool) *PostgresRepository {
 	return &PostgresRepository{
 		pool: pool,
 		sq:   squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
