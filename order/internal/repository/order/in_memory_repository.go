@@ -9,12 +9,14 @@ import (
 	"github.com/zhenklchhh/KozProject/order/internal/repository"
 )
 
-type orderRepository struct {
+type InMemoryRepository struct {
 	orderStorage *OrderStorage
 }
 
 func NewRepository() repository.OrderRepository {
-	return &orderRepository{orderStorage: NewOrderStorage()}
+	return &InMemoryRepository{
+		orderStorage: NewOrderStorage(),
+	}
 }
 
 type OrderStorage struct {
@@ -41,12 +43,17 @@ func (s *OrderStorage) Save(order *model.Order) {
 	s.storage[order.OrderUUID] = order
 }
 
-func (r *orderRepository) Create(ctx context.Context, order *model.Order) error {
+func (r *InMemoryRepository) Update(ctx context.Context, order *model.Order) error {
 	r.orderStorage.Save(order)
 	return nil
 }
 
-func (r *orderRepository) Get(ctx context.Context, uuid string) (*model.Order, error) {
+func (r *InMemoryRepository) Create(ctx context.Context, order *model.Order) (string, error) {
+	r.orderStorage.Save(order)
+	return order.OrderUUID, nil
+}
+
+func (r *InMemoryRepository) Get(ctx context.Context, uuid string) (*model.Order, error) {
 	order, ok := r.orderStorage.Get(uuid)
 	if !ok {
 		return nil, errors.New("failed to get order")

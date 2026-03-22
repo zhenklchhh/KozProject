@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
+	uuidString "github.com/google/uuid"
 
 	"github.com/zhenklchhh/KozProject/order/internal/client"
 	"github.com/zhenklchhh/KozProject/order/internal/model"
@@ -34,26 +34,26 @@ func (s *service) Create(ctx context.Context, req *model.CreateOrderRequest) (*m
 		Uuids: req.PartUuids,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("inventory client error: %v", err)
+		return nil, fmt.Errorf("inventory client error: %w", err)
 	}
 	totalPrice := 0.0
 	for _, part := range parts {
 		totalPrice += part.Price
 	}
-	newUUID := uuid.New()
+	orderUUID := uuidString.New()
 	order := &model.Order{
-		OrderUUID:  newUUID.String(),
+		OrderUUID:  orderUUID.String(),
 		UserUUID:   req.UserUUID,
 		PartUuids:  req.PartUuids,
 		TotalPrice: totalPrice,
 		Status:     model.OrderStatusPendingPayment,
 	}
-	err = s.repo.Create(ctx, order)
+	uuidString, err := s.repo.Create(ctx, order)
 	if err != nil {
-		return nil, fmt.Errorf("error creating order: %v", err)
+		return nil, fmt.Errorf("error creating order: %w", err)
 	}
 	return &model.CreateOrderResponse{
-		OrderUUID:  newUUID.String(),
+		OrderUUID:  uuidString,
 		TotalPrice: totalPrice,
 	}, nil
 }
@@ -63,7 +63,7 @@ func (s *service) Get(ctx context.Context, uuid string) (*model.Order, error) {
 }
 
 func (s *service) Update(ctx context.Context, order *model.Order) error {
-	return s.repo.Create(ctx, order)
+	return s.repo.Update(ctx, order)
 }
 
 func (s *service) PayOrder(ctx context.Context, req *model.PayOrderRequest, uuid string) (*model.PayOrderResponse, error) {
