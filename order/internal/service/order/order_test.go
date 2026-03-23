@@ -57,7 +57,7 @@ func (s *OrderServiceSuite) TestCreateOrderSuccess() {
 	}
 
 	s.inventoryClient.On("ListParts", s.ctx, &inventoryV1.PartFilter{Uuids: partUuids}).Return(parts, nil)
-	s.repo.On("Create", s.ctx, mock.AnythingOfType("*model.Order")).Return(nil)
+	s.repo.On("Create", s.ctx, mock.AnythingOfType("*model.Order")).Return(gofakeit.UUID(), nil)
 
 	resp, err := s.service.Create(s.ctx, req)
 
@@ -103,7 +103,7 @@ func (s *OrderServiceSuite) TestCreateOrderRepositoryError() {
 	}
 
 	s.inventoryClient.On("ListParts", s.ctx, &inventoryV1.PartFilter{Uuids: partUuids}).Return(parts, nil)
-	s.repo.On("Create", s.ctx, mock.AnythingOfType("*model.Order")).Return(errors.New("repo error"))
+	s.repo.On("Create", s.ctx, mock.AnythingOfType("*model.Order")).Return("", errors.New("repo error"))
 
 	resp, err := s.service.Create(s.ctx, req)
 
@@ -124,7 +124,7 @@ func (s *OrderServiceSuite) TestCreateOrderEmptyParts() {
 	}
 
 	s.inventoryClient.On("ListParts", s.ctx, &inventoryV1.PartFilter{Uuids: partUuids}).Return([]*inventoryV1.Part{}, nil)
-	s.repo.On("Create", s.ctx, mock.AnythingOfType("*model.Order")).Return(nil)
+	s.repo.On("Create", s.ctx, mock.AnythingOfType("*model.Order")).Return(gofakeit.UUID(), nil)
 
 	resp, err := s.service.Create(s.ctx, req)
 
@@ -193,7 +193,7 @@ func (s *OrderServiceSuite) TestPayOrderSuccess() {
 	s.paymentClient.On("PayOrder", s.ctx, mock.Anything).Return(&paymentV1.PayOrderResponse{
 		TransactionUuid: transactionUUID,
 	}, nil)
-	s.repo.On("Create", s.ctx, mock.AnythingOfType("*model.Order")).Return(nil)
+	s.repo.On("Update", s.ctx, mock.AnythingOfType("*model.Order")).Return(nil)
 
 	resp, err := s.service.PayOrder(s.ctx, req, orderUUID)
 
@@ -202,7 +202,7 @@ func (s *OrderServiceSuite) TestPayOrderSuccess() {
 	s.Require().Equal(resp.TransactionUUID, transactionUUID)
 	s.repo.AssertCalled(s.T(), "Get", s.ctx, orderUUID)
 	s.paymentClient.AssertCalled(s.T(), "PayOrder", s.ctx, mock.Anything)
-	s.repo.AssertCalled(s.T(), "Create", s.ctx, mock.AnythingOfType("*model.Order"))
+	s.repo.AssertCalled(s.T(), "Update", s.ctx, mock.AnythingOfType("*model.Order"))
 }
 
 func (s *OrderServiceSuite) TestPayOrderNotFound() {
@@ -222,7 +222,7 @@ func (s *OrderServiceSuite) TestPayOrderNotFound() {
 	s.Require().True(errors.Is(err, model.ErrNotFound))
 	s.repo.AssertCalled(s.T(), "Get", s.ctx, orderUUID)
 	s.paymentClient.AssertNotCalled(s.T(), "PayOrder", s.ctx, mock.Anything)
-	s.repo.AssertNotCalled(s.T(), "Create", s.ctx, mock.Anything)
+	s.repo.AssertNotCalled(s.T(), "Update", s.ctx, mock.Anything)
 }
 
 func (s *OrderServiceSuite) TestPayOrderInvalidStatus() {
@@ -250,7 +250,7 @@ func (s *OrderServiceSuite) TestPayOrderInvalidStatus() {
 	s.Require().True(errors.Is(err, model.ErrConflict))
 	s.repo.AssertCalled(s.T(), "Get", s.ctx, orderUUID)
 	s.paymentClient.AssertNotCalled(s.T(), "PayOrder", s.ctx, mock.Anything)
-	s.repo.AssertNotCalled(s.T(), "Create", s.ctx, mock.Anything)
+	s.repo.AssertNotCalled(s.T(), "Update", s.ctx, mock.Anything)
 }
 
 func (s *OrderServiceSuite) TestPayOrderInvalidPaymentMethod() {
@@ -278,7 +278,7 @@ func (s *OrderServiceSuite) TestPayOrderInvalidPaymentMethod() {
 	s.Require().True(errors.Is(err, model.ErrBadRequest))
 	s.repo.AssertCalled(s.T(), "Get", s.ctx, orderUUID)
 	s.paymentClient.AssertNotCalled(s.T(), "PayOrder", s.ctx, mock.Anything)
-	s.repo.AssertNotCalled(s.T(), "Create", s.ctx, mock.Anything)
+	s.repo.AssertNotCalled(s.T(), "Update", s.ctx, mock.Anything)
 }
 
 func (s *OrderServiceSuite) TestPayOrderPaymentClientError() {
@@ -333,7 +333,7 @@ func (s *OrderServiceSuite) TestPayOrderUpdateError() {
 	s.paymentClient.On("PayOrder", s.ctx, mock.Anything).Return(&paymentV1.PayOrderResponse{
 		TransactionUuid: transactionUUID,
 	}, nil)
-	s.repo.On("Create", s.ctx, mock.AnythingOfType("*model.Order")).Return(errors.New("update error"))
+	s.repo.On("Update", s.ctx, mock.AnythingOfType("*model.Order")).Return(errors.New("update error"))
 
 	resp, err := s.service.PayOrder(s.ctx, req, orderUUID)
 
@@ -342,7 +342,7 @@ func (s *OrderServiceSuite) TestPayOrderUpdateError() {
 	s.Require().Contains(err.Error(), "order service: failed to update order")
 	s.repo.AssertCalled(s.T(), "Get", s.ctx, orderUUID)
 	s.paymentClient.AssertCalled(s.T(), "PayOrder", s.ctx, mock.Anything)
-	s.repo.AssertCalled(s.T(), "Create", s.ctx, mock.AnythingOfType("*model.Order"))
+	s.repo.AssertCalled(s.T(), "Update", s.ctx, mock.AnythingOfType("*model.Order"))
 }
 
 // Cancel Order Tests
@@ -359,13 +359,13 @@ func (s *OrderServiceSuite) TestCancelOrderSuccess() {
 	}
 
 	s.repo.On("Get", s.ctx, orderUUID).Return(order, nil)
-	s.repo.On("Create", s.ctx, mock.AnythingOfType("*model.Order")).Return(nil)
+	s.repo.On("Update", s.ctx, mock.AnythingOfType("*model.Order")).Return(nil)
 
 	err := s.service.CancelOrder(s.ctx, orderUUID)
 
 	s.Require().NoError(err)
 	s.repo.AssertCalled(s.T(), "Get", s.ctx, orderUUID)
-	s.repo.AssertCalled(s.T(), "Create", s.ctx, mock.AnythingOfType("*model.Order"))
+	s.repo.AssertCalled(s.T(), "Update", s.ctx, mock.AnythingOfType("*model.Order"))
 }
 
 func (s *OrderServiceSuite) TestCancelOrderNotFound() {
@@ -378,7 +378,7 @@ func (s *OrderServiceSuite) TestCancelOrderNotFound() {
 	s.Require().Error(err)
 	s.Require().Contains(err.Error(), "order "+orderUUID+" not found")
 	s.repo.AssertCalled(s.T(), "Get", s.ctx, orderUUID)
-	s.repo.AssertNotCalled(s.T(), "Create", s.ctx, mock.Anything)
+	s.repo.AssertNotCalled(s.T(), "Update", s.ctx, mock.Anything)
 }
 
 func (s *OrderServiceSuite) TestCancelOrderInvalidStatus() {
@@ -414,12 +414,12 @@ func (s *OrderServiceSuite) TestCancelOrderUpdateError() {
 	}
 
 	s.repo.On("Get", s.ctx, orderUUID).Return(order, nil)
-	s.repo.On("Create", s.ctx, mock.AnythingOfType("*model.Order")).Return(errors.New("update error"))
+	s.repo.On("Update", s.ctx, mock.AnythingOfType("*model.Order")).Return(errors.New("update error"))
 
 	err := s.service.CancelOrder(s.ctx, orderUUID)
 
 	s.Require().Error(err)
 	s.Require().Contains(err.Error(), "failed updating order")
 	s.repo.AssertCalled(s.T(), "Get", s.ctx, orderUUID)
-	s.repo.AssertCalled(s.T(), "Create", s.ctx, mock.AnythingOfType("*model.Order"))
+	s.repo.AssertCalled(s.T(), "Update", s.ctx, mock.AnythingOfType("*model.Order"))
 }
