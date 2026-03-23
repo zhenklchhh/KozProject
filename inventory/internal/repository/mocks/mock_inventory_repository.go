@@ -6,6 +6,7 @@ import (
 	context "context"
 
 	mock "github.com/stretchr/testify/mock"
+
 	model "github.com/zhenklchhh/KozProject/inventory/internal/model"
 )
 

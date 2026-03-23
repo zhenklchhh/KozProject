@@ -22,6 +22,15 @@ packages:
   github.com/zhenklchhh/KozProject/order/internal/repository:
     config:
       include-regex: ".*Repository"
+
+  github.com/jackc/pgx/v5:
+    interfaces:
+      Row:
+        config:
+          dir: "order/internal/repository/order/mocks" 
+          outpkg: "mocks"
+
+  github.com/zhenklchhh/KozProject/order/internal/repository/order:
     interfaces:
       PgxPool:
   
