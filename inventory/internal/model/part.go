@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Category int32
 
@@ -37,9 +41,9 @@ type Dimensions struct {
 }
 
 type Manufacturer struct {
-	Name    string
-	Country string
-	Website string
+	Name    string `bson:"name"`
+	Country string `bson:"country"`
+	Website string `bson:"website"`
 }
 
 func (m *Manufacturer) GetCountry() string {
@@ -54,25 +58,25 @@ type Value struct {
 }
 
 type Part struct {
-	UUID          string
-	Name          string
-	Description   string
-	Price         float64
-	StockQuantity int64
-	Category      Category
-	Dimensions    *Dimensions
-	Manufacturer  *Manufacturer
-	Tags          []string
-	Metadata      map[string]*Value
-	CreatedAt     *time.Time
-	UpdatedAt     *time.Time
+	UUID          uuid.UUID         `bson:"_id"`
+	Name          string            `bson:"name"`
+	Description   string            `bson:"description"`
+	Price         float64           `bson:"price"`
+	StockQuantity int64             `bson:"stock_quantity"`
+	Category      Category          `bson:"category"`
+	Dimensions    *Dimensions       `bson:"dimensions"`
+	Manufacturer  *Manufacturer     `bson:"manufacturer"`
+	Tags          []string          `bson:"tags"`
+	Metadata      map[string]*Value `bson:"metadata"`
+	CreatedAt     *time.Time        `bson:"created_at"`
+	UpdatedAt     *time.Time        `bson:"updated_at"`
 }
 
-func (p *Part) GetUUID() string {
-	if p.UUID != "" {
+func (p *Part) GetUUID() uuid.UUID {
+	if p.UUID != uuid.Nil {
 		return p.UUID
 	}
-	return ""
+	return uuid.Nil
 }
 
 func (p *Part) GetName() string {
@@ -98,14 +102,14 @@ func (p *Part) GetTags() []string {
 }
 
 type PartFilter struct {
-	Uuids                 []string
+	Uuids                 []uuid.UUID
 	Names                 []string
 	Categories            []Category
 	ManufacturerCountries []string
 	Tags                  []string
 }
 
-func (x *PartFilter) GetUuids() []string {
+func (x *PartFilter) GetUuids() []uuid.UUID {
 	if x != nil {
 		return x.Uuids
 	}

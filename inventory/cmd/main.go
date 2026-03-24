@@ -13,6 +13,9 @@ import (
 	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
@@ -30,6 +33,13 @@ const (
 )
 
 func main() {
+	ctx := context.Background()
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Printf("failed to load env file: %v\n", err)
+		return
+	}
+
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
 	if err != nil {
 		log.Printf("failed to listen: %v\n", err)
@@ -41,7 +51,32 @@ func main() {
 		}
 	}()
 	s := grpc.NewServer()
-	repo := invPartRepo.NewRepository()
+
+	dbURI := os.Getenv("MONGO_DB_URI")
+	client, err := mongo.Connect(options.Client().ApplyURI(dbURI))
+	if err != nil {
+		log.Printf("failed to connect database: %v\n", err)
+		return
+	}
+	defer func(){
+		if cerr := client.Disconnect(ctx); cerr != nil {
+			log.Printf("failed to disconnect: %v\n", cerr)
+		}
+	}()
+
+	pingCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	err = client.Ping(pingCtx, nil)
+	if err != nil {
+		log.Printf("failed to ping database: %v\n", err)
+		return
+	}
+	db := client.Database("inventory-db")
+	repo, err := invPartRepo.NewMongoRepository(db)
+	if err != nil {
+		log.Printf("failed to create inventory repository: %v\n", err)
+		return
+	}
 	service := invPartService.NewService(repo)
 	apiHandler := invPartApi.NewAPI(service)
 	inventoryV1.RegisterInventoryServiceServer(s, apiHandler)

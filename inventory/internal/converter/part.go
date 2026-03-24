@@ -5,6 +5,7 @@ import (
 
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/google/uuid"
 	"github.com/zhenklchhh/KozProject/inventory/internal/model"
 	inventoryV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/inventory/v1"
 )
@@ -16,7 +17,7 @@ func PartServiceToPartRepo(part *inventoryV1.Part) *model.Part {
 	}
 
 	return &model.Part{
-		UUID:          part.GetUuid(),
+		UUID:          uuid.MustParse(part.GetUuid()),
 		Name:          part.GetName(),
 		Description:   part.GetDescription(),
 		Price:         part.GetPrice(),
@@ -130,8 +131,13 @@ func PartFilterServiceToRepo(filter *inventoryV1.PartFilter) *model.PartFilter {
 		categories = append(categories, CategoryServiceToRepo(category))
 	}
 
+	uuids := make([]uuid.UUID, 0, len(filter.Uuids))
+	for _, id := range filter.GetUuids() {
+		uuids = append(uuids, uuid.MustParse(id))
+	}
+
 	return &model.PartFilter{
-		Uuids:                 filter.GetUuids(),
+		Uuids:                 uuids,
 		Names:                 filter.GetNames(),
 		Categories:            categories,
 		ManufacturerCountries: filter.GetManufacturerCountries(),
@@ -146,7 +152,7 @@ func PartRepoToService(part *model.Part) *inventoryV1.Part {
 	}
 
 	return &inventoryV1.Part{
-		Uuid:          part.UUID,
+		Uuid:          part.UUID.String(),
 		Name:          part.Name,
 		Description:   part.Description,
 		Price:         part.Price,
@@ -269,8 +275,13 @@ func PartFilterRepoToService(filter *model.PartFilter) *inventoryV1.PartFilter {
 		categories = append(categories, CategoryRepoToService(category))
 	}
 
+	uuids := make([]string, 0, len(filter.Uuids))
+	for _, id := range filter.GetUuids() {
+		uuids = append(uuids, id.String())
+	}
+
 	return &inventoryV1.PartFilter{
-		Uuids:                 filter.Uuids,
+		Uuids:                 uuids,
 		Names:                 filter.Names,
 		Categories:            categories,
 		ManufacturerCountries: filter.ManufacturerCountries,

@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -17,6 +18,7 @@ func (s *APISuite) TestGetPartSuccess() {
 	req := &inventoryV1.GetPartRequest{
 		Uuid: gofakeit.UUID(),
 	}
+	modelUuid := uuid.MustParse(req.Uuid)
 	expectedResp := &inventoryV1.GetPartResponse{
 		Part: &inventoryV1.Part{
 			Uuid:          req.GetUuid(),
@@ -27,7 +29,7 @@ func (s *APISuite) TestGetPartSuccess() {
 		},
 	}
 	modelPart := &model.Part{
-		UUID:          req.GetUuid(),
+		UUID:          modelUuid,
 		Name:          "gas",
 		Description:   "fuel for space rocket",
 		Price:         20.3,
@@ -66,21 +68,25 @@ func (s *APISuite) TestGetPartServiceError() {
 }
 
 func (s *APISuite) TestListPartsSuccess() {
-	partUuids := []string{gofakeit.UUID(), gofakeit.UUID()}
+	partUuidsServer := []string{gofakeit.UUID(), gofakeit.UUID()}
+	partUuidsRepo := make([]uuid.UUID, 0, len(partUuidsServer))
+	for _, id := range partUuidsServer {
+		partUuidsRepo = append(partUuidsRepo, uuid.MustParse(id))
+	}
 	req := &inventoryV1.ListPartsRequest{
-		Filter: &inventoryV1.PartFilter{Uuids: partUuids},
+		Filter: &inventoryV1.PartFilter{Uuids: partUuidsServer},
 	}
 	expectedResp := &inventoryV1.ListPartsResponse{
 		Parts: []*inventoryV1.Part{
 			{
-				Uuid:          partUuids[0],
+				Uuid:          partUuidsServer[0],
 				Name:          "gas",
 				Description:   "fuel for space rocket",
 				Price:         20.3,
 				StockQuantity: 2,
 			},
 			{
-				Uuid:          partUuids[1],
+				Uuid:          partUuidsServer[1],
 				Name:          "engine v8",
 				Description:   "rocket engine",
 				Price:         1000.53,
@@ -90,14 +96,14 @@ func (s *APISuite) TestListPartsSuccess() {
 	}
 	modelParts := []*model.Part{
 		{
-			UUID:          partUuids[0],
+			UUID:          partUuidsRepo[0],
 			Name:          "gas",
 			Description:   "fuel for space rocket",
 			Price:         20.3,
 			StockQuantity: 2,
 		},
 		{
-			UUID:          partUuids[1],
+			UUID:          partUuidsRepo[1],
 			Name:          "engine v8",
 			Description:   "rocket engine",
 			Price:         1000.53,

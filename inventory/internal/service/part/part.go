@@ -2,7 +2,9 @@ package part
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/zhenklchhh/KozProject/inventory/internal/model"
 	"github.com/zhenklchhh/KozProject/inventory/internal/repository"
 )
@@ -17,10 +19,14 @@ func NewService(repo repository.InventoryRepository) *service {
 	}
 }
 
-func (s *service) GetPart(ctx context.Context, uuid string) (*model.Part, error) {
-	part, err := s.repo.GetPart(ctx, uuid)
+func (s *service) GetPart(ctx context.Context, id string) (*model.Part, error) {
+	partUUID, err := uuid.Parse(id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("service error: failed to parse uuid: %w", err)
+	}
+	part, err := s.repo.GetPart(ctx, partUUID)
+	if err != nil {
+		return nil, fmt.Errorf("service error: failed to get part %v: %w", partUUID, err)
 	}
 	return part, nil
 }

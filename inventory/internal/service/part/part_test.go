@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/google/uuid"
 
 	"github.com/zhenklchhh/KozProject/inventory/internal/model"
 )
@@ -19,7 +20,7 @@ func (s *ServiceSuite) TestGetPartSuccess() {
 		},
 	}
 	partUUID := gofakeit.UUID()
-	tc.part.UUID = partUUID
+	tc.part.UUID = uuid.MustParse(partUUID)
 	s.invRepo.On("GetPart", s.ctx, partUUID).Return(tc.part, nil)
 	resp, err := s.service.GetPart(s.ctx, partUUID)
 	s.Require().Equal(resp, tc.part)
@@ -37,7 +38,7 @@ func (s *ServiceSuite) TestGetPartRepoError() {
 }
 
 func (s *ServiceSuite) TestListPartsSuccess() {
-	partUuids := []string{gofakeit.UUID(), gofakeit.UUID()}
+	partUuids := []uuid.UUID{uuid.MustParse(gofakeit.UUID()), uuid.MustParse(gofakeit.UUID())}
 	pf := &model.PartFilter{Uuids: partUuids}
 	parts := []*model.Part{
 		{
@@ -62,7 +63,7 @@ func (s *ServiceSuite) TestListPartsSuccess() {
 }
 
 func (s *ServiceSuite) TestListPartsErr() {
-	partUuids := []string{gofakeit.UUID(), gofakeit.UUID()}
+	partUuids := []uuid.UUID{uuid.MustParse(gofakeit.UUID()), uuid.MustParse(gofakeit.UUID())}
 	pf := &model.PartFilter{Uuids: partUuids}
 
 	s.invRepo.On("ListParts", s.ctx, pf).Return(nil, errors.New("repo err"))
