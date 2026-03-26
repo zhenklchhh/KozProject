@@ -10,4 +10,4 @@ services:
 networks:
   core-network:
     name: core-network
-    external: true
+    external: false

@@ -2,13 +2,13 @@ version: '3.9'
 
 services:
   mongodb:
-    image: mongodb/mongodb-community-server:8.0-ubi8
+    image: mongo:7.0.5
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_ROOT_USERNAME=mongo
+      - MONGO_INITDB_ROOT_PASSWORD=password
       - MONGO_INITDB_DATABASE=inventory-db
     volumes:
-      - mongodata: /data/db
+      - mongodata:/data/db
     ports:
       - 27017:27017
     networks:
