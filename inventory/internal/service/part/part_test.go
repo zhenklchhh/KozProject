@@ -21,20 +21,21 @@ func (s *ServiceSuite) TestGetPartSuccess() {
 	}
 	partUUID := gofakeit.UUID()
 	tc.part.UUID = uuid.MustParse(partUUID)
-	s.invRepo.On("GetPart", s.ctx, partUUID).Return(tc.part, nil)
+	s.invRepo.On("GetPart", s.ctx, tc.part.UUID).Return(tc.part, nil)
 	resp, err := s.service.GetPart(s.ctx, partUUID)
 	s.Require().Equal(resp, tc.part)
 	s.Require().NoError(err)
-	s.invRepo.AssertCalled(s.T(), "GetPart", s.ctx, partUUID)
+	s.invRepo.AssertCalled(s.T(), "GetPart", s.ctx, tc.part.UUID)
 }
 
 func (s *ServiceSuite) TestGetPartRepoError() {
 	partUUID := gofakeit.UUID()
-	s.invRepo.On("GetPart", s.ctx, partUUID).Return(nil, errors.New("repo error"))
+	id := uuid.MustParse(partUUID)
+	s.invRepo.On("GetPart", s.ctx, id).Return(nil, errors.New("repo error"))
 	resp, err := s.service.GetPart(s.ctx, partUUID)
 	s.Require().Empty(resp)
 	s.Require().Error(err)
-	s.invRepo.AssertCalled(s.T(), "GetPart", s.ctx, partUUID)
+	s.invRepo.AssertCalled(s.T(), "GetPart", s.ctx, id)
 }
 
 func (s *ServiceSuite) TestListPartsSuccess() {

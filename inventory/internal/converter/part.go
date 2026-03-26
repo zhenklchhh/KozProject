@@ -3,9 +3,9 @@ package converter
 import (
 	"time"
 
+	"github.com/google/uuid"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/google/uuid"
 	"github.com/zhenklchhh/KozProject/inventory/internal/model"
 	inventoryV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/inventory/v1"
 )

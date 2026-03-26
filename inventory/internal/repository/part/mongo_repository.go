@@ -7,9 +7,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/zhenklchhh/KozProject/inventory/internal/model"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+
+	"github.com/zhenklchhh/KozProject/inventory/internal/model"
+)
+
+const (
+	createIndexTimeout = 30 * time.Second
 )
 
 type MongoRepository struct {
@@ -31,11 +36,8 @@ func NewMongoRepository(db *mongo.Database) (*MongoRepository, error) {
 		{
 			Keys: bson.D{{Key: "tags", Value: 1}},
 		},
-		{
-			Keys: bson.D{{Key: "name", Value: 1}},
-		},
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), createIndexTimeout)
 	defer cancel()
 	_, err := collection.Indexes().CreateMany(ctx, indexes)
 	if err != nil {
@@ -90,7 +92,7 @@ func (r *MongoRepository) find(ctx context.Context, filter bson.M) ([]*model.Par
 	}
 	defer cursor.Close(ctx)
 	var parts []*model.Part
-	if err := cursor.All(ctx, &parts); err != nil {
+	if err = cursor.All(ctx, &parts); err != nil {
 		return nil, err
 	}
 	return parts, nil

@@ -30,6 +30,7 @@ const (
 	grpcPort          = 50051
 	httpPort          = 8082
 	readHeaderTimeout = 10 * time.Second
+	pingTimeout       = 5 * time.Second
 )
 
 func main() {
@@ -58,13 +59,13 @@ func main() {
 		log.Printf("failed to connect database: %v\n", err)
 		return
 	}
-	defer func(){
+	defer func() {
 		if cerr := client.Disconnect(ctx); cerr != nil {
 			log.Printf("failed to disconnect: %v\n", cerr)
 		}
 	}()
 
-	pingCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	pingCtx, cancel := context.WithTimeout(ctx, pingTimeout)
 	defer cancel()
 	err = client.Ping(pingCtx, nil)
 	if err != nil {
@@ -89,16 +90,15 @@ func main() {
 		}
 	}()
 	var gwServer *http.Server
+	gwCtx, gwCancel := context.WithCancel(ctx)
 	go func() {
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
-
+		defer gwCancel()
 		mux := runtime.NewServeMux()
 
 		opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 
 		err = inventoryV1.RegisterInventoryServiceHandlerFromEndpoint(
-			ctx,
+			gwCtx,
 			mux,
 			fmt.Sprintf("localhost:%d", grpcPort),
 			opts,

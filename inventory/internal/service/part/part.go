@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+
 	"github.com/zhenklchhh/KozProject/inventory/internal/model"
 	"github.com/zhenklchhh/KozProject/inventory/internal/repository"
 )
