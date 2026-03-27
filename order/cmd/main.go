@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"log"
 	"net"
@@ -13,6 +14,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/jackc/pgx/v5/pgxpool"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -20,6 +23,7 @@ import (
 	orderApi "github.com/zhenklchhh/KozProject/order/internal/api/order/v1"
 	invClient "github.com/zhenklchhh/KozProject/order/internal/client/inventory/v1"
 	payClient "github.com/zhenklchhh/KozProject/order/internal/client/payment/v1"
+	"github.com/zhenklchhh/KozProject/order/internal/migrator"
 	"github.com/zhenklchhh/KozProject/order/internal/repository/order"
 	service "github.com/zhenklchhh/KozProject/order/internal/service/order"
 	orderV1 "github.com/zhenklchhh/KozProject/shared/pkg/api/order/v1"
@@ -28,7 +32,7 @@ import (
 )
 
 const (
-	httpPort           = "8080"
+	httpPort           = "8082"
 	readHeaderTimeout  = 5 * time.Second
 	shutdownTimeout    = 10 * time.Second
 	inventoryClientUri = "INVENTORY_CLIENT_URI"
@@ -36,19 +40,36 @@ const (
 )
 
 func main() {
-	repo := order.NewRepository()
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Printf("Error loading .env file: %v\n", err)
+		log.Fatalf("Error loading .env file: %v\n", err)
+	}
+	dbURI := os.Getenv("DB_URI")
+	sqlDB, err := sql.Open("pgx", dbURI)
+	if err != nil {
+		log.Fatalf("Error connecting to database: %v\n", err)
+	}
+	defer sqlDB.Close()
+	migratorRunner := migrator.NewMigrator(sqlDB, os.Getenv("MIGRATIONS_DIR"))
+	if err = migratorRunner.Up(); err != nil {
+		log.Printf("Error applying migrations: %v\n", err)
 		return
 	}
+	pool, err := pgxpool.New(context.Background(), dbURI)
+	if err != nil {
+		log.Printf("Error connect to database: %v\n", err)
+		return
+	}
+	repo := order.NewPostgresRepository(pool)
 	connInv, err := grpc.NewClient(os.Getenv(inventoryClientUri), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("failed to create inventory client connection: %v", err)
+		log.Printf("failed to create inventory client connection: %v", err)
+		return
 	}
 	connPay, err := grpc.NewClient(os.Getenv(paymentClientUri), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("failed to create payment client connection: %v", err)
+		log.Printf("failed to create payment client connection: %v", err)
+		return
 	}
 	inventoryClient := invClient.NewClient(inventoryV1.NewInventoryServiceClient(connInv))
 	paymentClient := payClient.NewClient(paymentV1.NewPaymentServiceClient(connPay))
@@ -56,7 +77,8 @@ func main() {
 	apiHandler := orderApi.NewApi(svc)
 	apiServer, err := orderV1.NewServer(apiHandler)
 	if err != nil {
-		log.Fatalf("ошибка создания сервера OpenAPI: %v", err)
+		log.Printf("ошибка создания сервера OpenAPI: %v", err)
+		return
 	}
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
