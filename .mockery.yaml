@@ -7,9 +7,9 @@ resolve-type-alias: False
 issue-845-fix: True
 
 packages:
-  github.com/zhenklchhh/KozProject/o/internal/service:
+  github.com/zhenklchhh/KozProject/order/internal/transaction:
     config:
-      include-regex: ".*Service"
+      include-regex: ".*Manager"
 
   github.com/zhenklchhh/KozProject/payment/internal/repository:
     config:

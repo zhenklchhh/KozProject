@@ -12,6 +12,7 @@ import (
 	"github.com/zhenklchhh/KozProject/order/internal/client"
 	"github.com/zhenklchhh/KozProject/order/internal/model"
 	repoMock "github.com/zhenklchhh/KozProject/order/internal/repository/mocks"
+	txMock "github.com/zhenklchhh/KozProject/order/internal/transaction/mocks"
 	inventoryV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/inventory/v1"
 	paymentV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/payment/v1"
 )
@@ -23,6 +24,7 @@ type OrderServiceSuite struct {
 	repo            *repoMock.OrderRepository
 	paymentClient   *client.MockPaymentClient
 	inventoryClient *client.MockInventoryClient
+	mockTxManager   *txMock.TransactionManager
 	service         *service
 }
 
@@ -31,7 +33,8 @@ func (s *OrderServiceSuite) SetupTest() {
 	s.repo = repoMock.NewOrderRepository(s.T())
 	s.paymentClient = &client.MockPaymentClient{}
 	s.inventoryClient = &client.MockInventoryClient{}
-	s.service = NewService(s.repo, s.paymentClient, s.inventoryClient)
+	s.mockTxManager = txMock.NewTransactionManager(s.T())
+	s.service = NewService(s.repo, s.mockTxManager, s.paymentClient, s.inventoryClient)
 }
 
 func (s *OrderServiceSuite) TearDownTest() {
@@ -189,11 +192,15 @@ func (s *OrderServiceSuite) TestPayOrderSuccess() {
 		PaymentMethod: paymentMethod,
 	}
 
-	s.repo.On("Get", s.ctx, orderUUID).Return(order, nil)
-	s.paymentClient.On("PayOrder", s.ctx, mock.Anything).Return(&paymentV1.PayOrderResponse{
+	s.mockTxManager.On("WithinTransaction", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		fn := args.Get(1).(func(context.Context) error)
+		fn(s.ctx)
+	}).Return(nil)
+	s.repo.On("Get", mock.Anything, orderUUID).Return(order, nil)
+	s.paymentClient.On("PayOrder", mock.Anything, mock.Anything).Return(&paymentV1.PayOrderResponse{
 		TransactionUuid: transactionUUID,
 	}, nil)
-	s.repo.On("Update", s.ctx, mock.AnythingOfType("*model.Order")).Return(nil)
+	s.repo.On("Update", mock.Anything, mock.AnythingOfType("*model.Order")).Return(nil)
 
 	resp, err := s.service.PayOrder(s.ctx, req, orderUUID)
 
@@ -213,7 +220,11 @@ func (s *OrderServiceSuite) TestPayOrderNotFound() {
 		PaymentMethod: paymentMethod,
 	}
 
-	s.repo.On("Get", s.ctx, orderUUID).Return(nil, errors.New("not found"))
+	s.mockTxManager.On("WithinTransaction", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		fn := args.Get(1).(func(context.Context) error)
+		fn(s.ctx)
+	}).Return(model.ErrNotFound)
+	s.repo.On("Get", mock.Anything, orderUUID).Return(nil, model.ErrNotFound)
 
 	resp, err := s.service.PayOrder(s.ctx, req, orderUUID)
 
@@ -241,6 +252,10 @@ func (s *OrderServiceSuite) TestPayOrderInvalidStatus() {
 		PaymentMethod: paymentMethod,
 	}
 
+	s.mockTxManager.On("WithinTransaction", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		fn := args.Get(1).(func(context.Context) error)
+		fn(s.ctx)
+	}).Return(model.ErrConflict)
 	s.repo.On("Get", s.ctx, orderUUID).Return(order, nil)
 
 	resp, err := s.service.PayOrder(s.ctx, req, orderUUID)
@@ -269,6 +284,10 @@ func (s *OrderServiceSuite) TestPayOrderInvalidPaymentMethod() {
 		PaymentMethod: paymentMethod,
 	}
 
+	s.mockTxManager.On("WithinTransaction", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		fn := args.Get(1).(func(context.Context) error)
+		fn(s.ctx)
+	}).Return(model.ErrBadRequest)
 	s.repo.On("Get", s.ctx, orderUUID).Return(order, nil)
 
 	resp, err := s.service.PayOrder(s.ctx, req, orderUUID)
@@ -298,6 +317,10 @@ func (s *OrderServiceSuite) TestPayOrderPaymentClientError() {
 		PaymentMethod: paymentMethod,
 	}
 
+	s.mockTxManager.On("WithinTransaction", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		fn := args.Get(1).(func(context.Context) error)
+		fn(s.ctx)
+	}).Return(errors.New("payment client error"))
 	s.repo.On("Get", s.ctx, orderUUID).Return(order, nil)
 	s.paymentClient.On("PayOrder", s.ctx, mock.Anything).Return(nil, errors.New("payment error"))
 
@@ -329,6 +352,10 @@ func (s *OrderServiceSuite) TestPayOrderUpdateError() {
 		PaymentMethod: paymentMethod,
 	}
 
+	s.mockTxManager.On("WithinTransaction", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		fn := args.Get(1).(func(context.Context) error)
+		fn(s.ctx)
+	}).Return(errors.New("order service: failed to update order"))
 	s.repo.On("Get", s.ctx, orderUUID).Return(order, nil)
 	s.paymentClient.On("PayOrder", s.ctx, mock.Anything).Return(&paymentV1.PayOrderResponse{
 		TransactionUuid: transactionUUID,
@@ -358,6 +385,10 @@ func (s *OrderServiceSuite) TestCancelOrderSuccess() {
 		Status:     model.OrderStatusPendingPayment,
 	}
 
+	s.mockTxManager.On("WithinTransaction", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		fn := args.Get(1).(func(context.Context) error)
+		fn(s.ctx)
+	}).Return(nil)
 	s.repo.On("Get", s.ctx, orderUUID).Return(order, nil)
 	s.repo.On("Update", s.ctx, mock.AnythingOfType("*model.Order")).Return(nil)
 
@@ -371,6 +402,10 @@ func (s *OrderServiceSuite) TestCancelOrderSuccess() {
 func (s *OrderServiceSuite) TestCancelOrderNotFound() {
 	orderUUID := gofakeit.UUID()
 
+	s.mockTxManager.On("WithinTransaction", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		fn := args.Get(1).(func(context.Context) error)
+		fn(s.ctx)
+	}).Return(errors.New("order " + orderUUID + " not found"))
 	s.repo.On("Get", s.ctx, orderUUID).Return(nil, errors.New("not found"))
 
 	err := s.service.CancelOrder(s.ctx, orderUUID)
@@ -392,6 +427,10 @@ func (s *OrderServiceSuite) TestCancelOrderInvalidStatus() {
 		Status:     model.OrderStatusPaid,
 	}
 
+	s.mockTxManager.On("WithinTransaction", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		fn := args.Get(1).(func(context.Context) error)
+		fn(s.ctx)
+	}).Return(errors.New("can't be cancelled with status"))
 	s.repo.On("Get", s.ctx, orderUUID).Return(order, nil)
 
 	err := s.service.CancelOrder(s.ctx, orderUUID)
@@ -413,6 +452,10 @@ func (s *OrderServiceSuite) TestCancelOrderUpdateError() {
 		Status:     model.OrderStatusPendingPayment,
 	}
 
+	s.mockTxManager.On("WithinTransaction", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		fn := args.Get(1).(func(context.Context) error)
+		fn(s.ctx)
+	}).Return(errors.New("failed updating order"))
 	s.repo.On("Get", s.ctx, orderUUID).Return(order, nil)
 	s.repo.On("Update", s.ctx, mock.AnythingOfType("*model.Order")).Return(errors.New("update error"))
 

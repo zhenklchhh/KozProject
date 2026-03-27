@@ -26,6 +26,7 @@ import (
 	"github.com/zhenklchhh/KozProject/order/internal/migrator"
 	"github.com/zhenklchhh/KozProject/order/internal/repository/order"
 	service "github.com/zhenklchhh/KozProject/order/internal/service/order"
+	"github.com/zhenklchhh/KozProject/order/internal/transaction"
 	orderV1 "github.com/zhenklchhh/KozProject/shared/pkg/api/order/v1"
 	inventoryV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/inventory/v1"
 	paymentV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/payment/v1"
@@ -73,7 +74,8 @@ func main() {
 	}
 	inventoryClient := invClient.NewClient(inventoryV1.NewInventoryServiceClient(connInv))
 	paymentClient := payClient.NewClient(paymentV1.NewPaymentServiceClient(connPay))
-	svc := service.NewService(repo, paymentClient, inventoryClient)
+	txManager := transaction.NewManager(pool)
+	svc := service.NewService(repo, txManager, paymentClient, inventoryClient)
 	apiHandler := orderApi.NewApi(svc)
 	apiServer, err := orderV1.NewServer(apiHandler)
 	if err != nil {
