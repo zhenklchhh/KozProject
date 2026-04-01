@@ -2,10 +2,8 @@ version: '3.9'
 services:
   mongodb:
     image: mongo:7.0.5
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
-      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+    env_file:
+      - .env
     volumes:
       - mongodata:/data/db
     ports:

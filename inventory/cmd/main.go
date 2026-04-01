@@ -3,17 +3,14 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"google.golang.org/grpc"
@@ -21,27 +18,21 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	invPartApi "github.com/zhenklchhh/KozProject/inventory/internal/api/inventory/v1"
+	"github.com/zhenklchhh/KozProject/inventory/internal/config"
 	invPartRepo "github.com/zhenklchhh/KozProject/inventory/internal/repository/part"
 	invPartService "github.com/zhenklchhh/KozProject/inventory/internal/service/part"
 	inventoryV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/inventory/v1"
 )
 
-const (
-	grpcPort          = 50051
-	httpPort          = 8082
-	readHeaderTimeout = 10 * time.Second
-	pingTimeout       = 5 * time.Second
-)
-
 func main() {
 	ctx := context.Background()
-	err := godotenv.Load(".env")
+	cfg, err := config.Load("./deploy/env/.env")
 	if err != nil {
-		log.Printf("failed to load env file: %v\n", err)
+		log.Printf("failed to load config: %v\n", err)
 		return
 	}
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
+	lis, err := net.Listen("tcp", cfg.GRPC().Address())
 	if err != nil {
 		log.Printf("failed to listen: %v\n", err)
 		return
@@ -51,10 +42,9 @@ func main() {
 			log.Printf("failed to close listener: %v\n", err)
 		}
 	}()
-	s := grpc.NewServer()
 
-	dbURI := os.Getenv("MONGO_DB_URI")
-	client, err := mongo.Connect(options.Client().ApplyURI(dbURI))
+	s := grpc.NewServer()
+	client, err := mongo.Connect(options.Client().ApplyURI(cfg.Mongo().URI()))
 	if err != nil {
 		log.Printf("failed to connect database: %v\n", err)
 		return
@@ -65,14 +55,14 @@ func main() {
 		}
 	}()
 
-	pingCtx, cancel := context.WithTimeout(ctx, pingTimeout)
+	pingCtx, cancel := context.WithTimeout(ctx, cfg.HTTP().GetPingTimeout())
 	defer cancel()
 	err = client.Ping(pingCtx, nil)
 	if err != nil {
 		log.Printf("failed to ping database: %v\n", err)
 		return
 	}
-	db := client.Database("inventory-db")
+	db := client.Database(cfg.Mongo().Database())
 	repo, err := invPartRepo.NewMongoRepository(db)
 	if err != nil {
 		log.Printf("failed to create inventory repository: %v\n", err)
@@ -100,7 +90,7 @@ func main() {
 		err = inventoryV1.RegisterInventoryServiceHandlerFromEndpoint(
 			gwCtx,
 			mux,
-			fmt.Sprintf("localhost:%d", grpcPort),
+			cfg.GRPC().Address(),
 			opts,
 		)
 		if err != nil {
@@ -108,31 +98,24 @@ func main() {
 			return
 		}
 
-		projectRoot := os.Getenv("PROJECT_ROOT")
-		if projectRoot == "" {
-			projectRoot = "../.."
-		}
-		staticDir := projectRoot + "/inventory/static"
-		swaggerFile := projectRoot + "/api/inventory/v1/inventory.swagger.json"
-
 		httpMux := http.NewServeMux()
 		httpMux.Handle("/api/", mux)
 
-		staticFS := http.FileServer(http.Dir(staticDir))
+		staticFS := http.FileServer(http.Dir(cfg.HTTP().StaticDir()))
 		httpMux.Handle("/", staticFS)
 
 		httpMux.HandleFunc("/api/inventory/v1/inventory.swagger.json", func(w http.ResponseWriter, r *http.Request) {
-			log.Printf("📄 Serving swagger file: %s", swaggerFile)
+			log.Printf("📄 Serving swagger file: %s", cfg.HTTP().GetSwaggerFile())
 			w.Header().Set("Content-Type", "application/json")
-			http.ServeFile(w, r, swaggerFile)
+			http.ServeFile(w, r, cfg.HTTP().GetSwaggerFile())
 		})
 		gwServer = &http.Server{
-			Addr:              fmt.Sprintf(":%d", httpPort),
+			Addr:              cfg.HTTP().Address(),
 			Handler:           httpMux,
-			ReadHeaderTimeout: readHeaderTimeout,
+			ReadHeaderTimeout: cfg.HTTP().GetReadHeaderTimeout(),
 		}
 
-		log.Printf("📖 Swagger UI available at http://localhost:%d/\n", httpPort)
+		log.Printf("📖 Swagger UI available at http://%s\n", cfg.GRPC().Address())
 		err = gwServer.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Printf("failed to listen server: %v\n", err)

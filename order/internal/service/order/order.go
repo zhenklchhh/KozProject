@@ -26,7 +26,7 @@ func NewService(repo repository.OrderRepository, txManager transaction.Transacti
 ) *service {
 	return &service{
 		repo:            repo,
-		txManager: txManager,
+		txManager:       txManager,
 		paymentClient:   paymentClient,
 		inventoryClient: inventoryClient,
 	}

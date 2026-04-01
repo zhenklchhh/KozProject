@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,13 +15,13 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
 	orderApi "github.com/zhenklchhh/KozProject/order/internal/api/order/v1"
 	invClient "github.com/zhenklchhh/KozProject/order/internal/client/inventory/v1"
 	payClient "github.com/zhenklchhh/KozProject/order/internal/client/payment/v1"
+	"github.com/zhenklchhh/KozProject/order/internal/config"
 	"github.com/zhenklchhh/KozProject/order/internal/migrator"
 	"github.com/zhenklchhh/KozProject/order/internal/repository/order"
 	service "github.com/zhenklchhh/KozProject/order/internal/service/order"
@@ -32,42 +31,33 @@ import (
 	paymentV1 "github.com/zhenklchhh/KozProject/shared/pkg/proto/payment/v1"
 )
 
-const (
-	httpPort           = "8082"
-	readHeaderTimeout  = 5 * time.Second
-	shutdownTimeout    = 10 * time.Second
-	inventoryClientUri = "INVENTORY_CLIENT_URI"
-	paymentClientUri   = "PAYMENT_CLIENT_URI"
-)
-
 func main() {
-	err := godotenv.Load(".env")
+	cfg, err := config.Load("./deploy/env/.env")
 	if err != nil {
-		log.Fatalf("Error loading .env file: %v\n", err)
+		log.Fatalf("Error loading config: %v\n", err)
 	}
-	dbURI := os.Getenv("DB_URI")
-	sqlDB, err := sql.Open("pgx", dbURI)
+	sqlDB, err := sql.Open("pgx", cfg.Postgres().URI())
 	if err != nil {
 		log.Fatalf("Error connecting to database: %v\n", err)
 	}
 	defer sqlDB.Close()
-	migratorRunner := migrator.NewMigrator(sqlDB, os.Getenv("MIGRATIONS_DIR"))
+	migratorRunner := migrator.NewMigrator(sqlDB, cfg.Migrations().Dir())
 	if err = migratorRunner.Up(); err != nil {
 		log.Printf("Error applying migrations: %v\n", err)
 		return
 	}
-	pool, err := pgxpool.New(context.Background(), dbURI)
+	pool, err := pgxpool.New(context.Background(), cfg.Postgres().URI())
 	if err != nil {
 		log.Printf("Error connect to database: %v\n", err)
 		return
 	}
 	repo := order.NewPostgresRepository(pool)
-	connInv, err := grpc.NewClient(os.Getenv(inventoryClientUri), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	connInv, err := grpc.NewClient(cfg.InventoryClient().URI(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Printf("failed to create inventory client connection: %v", err)
 		return
 	}
-	connPay, err := grpc.NewClient(os.Getenv(paymentClientUri), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	connPay, err := grpc.NewClient(cfg.PaymentClient().URI(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Printf("failed to create payment client connection: %v", err)
 		return
@@ -79,7 +69,7 @@ func main() {
 	apiHandler := orderApi.NewApi(svc)
 	apiServer, err := orderV1.NewServer(apiHandler)
 	if err != nil {
-		log.Printf("ошибка создания сервера OpenAPI: %v", err)
+		log.Printf("error while creating OpenAPI server: %v", err)
 		return
 	}
 	r := chi.NewRouter()
@@ -88,12 +78,12 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Mount("/", apiServer)
 	server := &http.Server{
-		Addr:              net.JoinHostPort("localhost", httpPort),
+		Addr:              cfg.HTTP().Address(),
 		Handler:           r,
-		ReadHeaderTimeout: readHeaderTimeout,
+		ReadHeaderTimeout: cfg.HTTP().GetReadHeaderTimeout(),
 	}
 	go func() {
-		log.Printf("🚀 HTTP-сервер запущен на порту %s\n", httpPort)
+		log.Printf("🚀 HTTP-сервер запущен по адресу %s\n", cfg.HTTP().Address())
 		err = server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Printf("❌ Ошибка запуска сервера: %v\n", err)
@@ -104,7 +94,7 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.Context().GetShutdownTimeout())
 	defer cancel()
 	err = server.Shutdown(ctx)
 	if err != nil {

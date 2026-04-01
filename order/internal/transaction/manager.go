@@ -19,7 +19,7 @@ type Manager struct {
 	pool *pgxpool.Pool
 }
 
-func NewManager(pool *pgxpool.Pool) *Manager{
+func NewManager(pool *pgxpool.Pool) *Manager {
 	return &Manager{
 		pool: pool,
 	}
