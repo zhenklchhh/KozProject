@@ -393,7 +393,7 @@ tasks:
     dir: deploy/compose/core
     cmds:
       - echo "[task] 🚀 Поднимаем core контейнеры"
-      - docker compose --env-file ../../../.env up --build --detach
+      - docker compose up --build --detach
 
   down-core:
     desc: Остановить и удалить core контейнеры
@@ -407,7 +407,7 @@ tasks:
     dir: deploy/compose/inventory
     cmds:
       - echo "[task] 📦 Поднимаем Inventory с зависимостями"
-      - docker compose --env-file ../../../.env up --build --detach
+      - docker compose up --build --detach
 
   down-inventory:
     desc: Остановить и удалить Inventory сервис и все его зависимости
@@ -421,7 +421,7 @@ tasks:
     dir: deploy/compose/order
     cmds:
       - echo "[task] 📦 Поднимаем Order с зависимостями"
-      - docker compose --env-file ../../../.env up --build --detach
+      - docker compose up --build --detach
 
   down-order:
     desc: Остановить и удалить Order сервис и все его зависимости

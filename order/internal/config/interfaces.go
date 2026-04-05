@@ -9,6 +9,12 @@ type Config interface {
 	PaymentClient() ClientConfig
 	Migrations() MigrationsConfig
 	Postgres() PostgresConfig
+	Logger() LoggerConfig
+}
+
+type LoggerConfig interface{
+	Level() string
+	AsJson() bool
 }
 
 type HttpConfig interface {

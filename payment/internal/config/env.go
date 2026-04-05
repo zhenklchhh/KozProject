@@ -8,9 +8,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var (
+	cfg *appConfig
+)
+
 type appConfig struct {
 	grpcConfig GrpcConfig
 	httpConfig HttpConfig
+	loggerConfig LoggerConfig
 }
 
 func (c *appConfig) GRPC() GrpcConfig {
@@ -19,6 +24,10 @@ func (c *appConfig) GRPC() GrpcConfig {
 
 func (c *appConfig) HTTP() HttpConfig {
 	return c.httpConfig
+}
+
+func (c *appConfig) Logger() LoggerConfig {
+	return c.loggerConfig
 }
 
 type grpcEnvConfig struct {
@@ -60,21 +69,53 @@ func (c *httpEnvConfig) GetReadHeaderTimeout() time.Duration {
 	return c.ReadHeaderTimeout
 }
 
-func Load(path string) (Config, error) {
+type loggerEnvConfig struct {
+	LoggerLevel string `env:"LOGGER_LEVEL,required" envDefault:""`
+	LogsAsJson bool `env:"LOGGER_AS_JSON,required"`
+}
+
+func newLoggerConfig() (LoggerConfig, error) {
+	var cfg loggerEnvConfig
+	if err := env.Parse(&cfg); err != nil {
+		return nil, err
+	}
+	return &cfg, nil
+}
+
+func (c *loggerEnvConfig) Level() string {
+	return c.LoggerLevel
+}
+
+func (c *loggerEnvConfig) AsJson() bool {
+	return c.LogsAsJson
+}
+
+func Load(path string) error {
 	_ = godotenv.Load(path)
 
 	grpcConfig, err := newGRPCConfig()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	httpConfig, err := newHttpConfig()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &appConfig{
+	loggerConfig, err := newLoggerConfig()
+	if err != nil {
+		return err
+	}
+
+	cfg = &appConfig{
 		grpcConfig: grpcConfig,
 		httpConfig: httpConfig,
-	}, nil
+		loggerConfig: loggerConfig,
+	}
+	return nil
+}
+
+func AppConfig() Config {
+	return cfg
 }

@@ -5,6 +5,7 @@ import "time"
 type Config interface {
 	GRPC() GrpcConfig
 	HTTP() HttpConfig
+	Logger() LoggerConfig
 }
 
 type GrpcConfig interface {
@@ -14,4 +15,9 @@ type GrpcConfig interface {
 type HttpConfig interface {
 	Address() string
 	GetReadHeaderTimeout() time.Duration
+}
+
+type LoggerConfig interface {
+	Level() string
+	AsJson() bool
 }

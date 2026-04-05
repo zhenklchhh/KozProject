@@ -8,6 +8,10 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var (
+	appCfg *appConfig
+)
+
 type appConfig struct {
 	httpConfig            HttpConfig
 	ctxConfig             ContextConfig
@@ -15,6 +19,7 @@ type appConfig struct {
 	paymentClientConfig   ClientConfig
 	migrationsConfig      MigrationsConfig
 	postgresConfig        PostgresConfig
+	loggerConfig LoggerConfig
 }
 
 func (c *appConfig) HTTP() HttpConfig {
@@ -39,6 +44,10 @@ func (c *appConfig) Migrations() MigrationsConfig {
 
 func (c *appConfig) Postgres() PostgresConfig {
 	return c.postgresConfig
+}
+
+func (c *appConfig) Logger() LoggerConfig {
+	return c.loggerConfig
 }
 
 type httpEnvConfig struct {
@@ -80,7 +89,7 @@ func (c *contextEnvConfig) GetShutdownTimeout() time.Duration {
 }
 
 type inventoryClientEnvConfig struct {
-	URL string `env:"INVENTORY_CLIENT_URL, required"`
+	URL string `env:"INVENTORY_CLIENT_URL,required"`
 }
 
 func newInventoryClientConfig() (ClientConfig, error) {
@@ -96,7 +105,7 @@ func (c *inventoryClientEnvConfig) URI() string {
 }
 
 type paymentClientEnvConfig struct {
-	URL string `env:"PAYMENT_CLIENT_URL, required"`
+	URL string `env:"PAYMENT_CLIENT_URL,required"`
 }
 
 func newPaymentClientConfig() (ClientConfig, error) {
@@ -112,7 +121,7 @@ func (c *paymentClientEnvConfig) URI() string {
 }
 
 type migrationEnvConfig struct {
-	Directory string `env:"MIGRATIONS_DIR, required"`
+	Directory string `env:"MIGRATIONS_DIR,required"`
 }
 
 func newMigrationsConfig() (MigrationsConfig, error) {
@@ -128,10 +137,10 @@ func (c *migrationEnvConfig) Dir() string {
 }
 
 type postgresEnvConfig struct {
-	Username string `env:"POSTGRES_USER, required"`
-	Password string `env:"POSTGRES_PASSWORD, required"`
-	DB       string `env:"POSTGRES_DB, required"`
-	URL      string `env:"DB_URI, required"`
+	Username string `env:"POSTGRES_USER,required"`
+	Password string `env:"POSTGRES_PASSWORD,required"`
+	DB       string `env:"POSTGRES_DB,required"`
+	URL      string `env:"DB_URI,required"`
 }
 
 func newPostgresConfig() (PostgresConfig, error) {
@@ -150,43 +159,76 @@ func (c *postgresEnvConfig) URI() string {
 	return c.URL
 }
 
-func Load(path string) (Config, error) {
+type loggerEnvConfig struct {
+	LoggerLevel string `env:"LOGGER_LEVEL,required"`
+	LogsAsJson bool `env:"LOGGER_AS_JSON" envDefault:"true"`
+}
+
+func newLoggerConfig() (LoggerConfig, error) {
+	var cfg loggerEnvConfig
+	if err := env.Parse(&cfg); err != nil {
+		return nil, err
+	}
+	return &cfg, nil
+}
+
+func (c *loggerEnvConfig) Level() string{
+	return c.LoggerLevel
+}
+
+func (c *loggerEnvConfig) AsJson() bool {
+	return c.LogsAsJson
+}
+
+func Load(path string) error {
 	_ = godotenv.Load(path)
 	httpConfig, err := newHttpConfig()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	contextConfig, err := newContextConfig()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	invClientConfig, err := newInventoryClientConfig()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	paymentClientConfig, err := newPaymentClientConfig()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	migrationConfig, err := newMigrationsConfig()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	postgresConfig, err := newPostgresConfig()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return &appConfig{
+	
+	loggerConfig, err := newLoggerConfig()
+	if err != nil {
+		return err
+	}
+
+	appCfg = &appConfig{
 		httpConfig:            httpConfig,
 		ctxConfig:             contextConfig,
 		inventoryClientConfig: invClientConfig,
 		paymentClientConfig:   paymentClientConfig,
 		migrationsConfig:      migrationConfig,
 		postgresConfig:        postgresConfig,
-	}, nil
+		loggerConfig: loggerConfig,
+	}
+	return nil
+}
+
+func AppConfig() *appConfig {
+	return appCfg
 }

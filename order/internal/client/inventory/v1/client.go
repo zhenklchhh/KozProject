@@ -33,3 +33,13 @@ func (c *client) ListParts(ctx context.Context, partFilter *inventoryV1.PartFilt
 	}
 	return invResp.Parts, nil
 }
+
+func (c *client) GetPart(ctx context.Context, uuid string) (*inventoryV1.Part, error) {
+	invResp, err := c.inventoryClient.GetPart(ctx, &inventoryV1.GetPartRequest{
+		Uuid: uuid,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get part from inventory client: %v", err)
+	}
+	return invResp.Part, nil
+}
